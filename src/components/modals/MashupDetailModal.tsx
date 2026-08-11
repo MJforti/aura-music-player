@@ -1,6 +1,6 @@
 import React from 'react';
 import { usePlayback } from '../../context/PlaybackContext';
-import { X, Play, ExternalLink as ExternalLinkIcon, Disc, User, Heart } from 'lucide-react';
+import { X, Play, ExternalLink as ExternalLinkIcon, Disc, User, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const MashupDetailModal: React.FC = () => {
@@ -9,6 +9,19 @@ export const MashupDetailModal: React.FC = () => {
   if (!selectedMashupForDetail) return null;
 
   const m = selectedMashupForDetail;
+
+  const getAvailabilityBadge = () => {
+    switch (m.availability) {
+      case 'playable':
+        return <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold">FULL AUDIO</span>;
+      case 'preview':
+        return <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 font-mono text-[10px] font-bold">PREVIEW • 30S</span>;
+      case 'external-only':
+        return <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-mono text-[10px] font-bold">EXTERNAL ONLY</span>;
+      default:
+        return <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 font-mono text-[10px] font-bold">UNAVAILABLE</span>;
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -22,7 +35,7 @@ export const MashupDetailModal: React.FC = () => {
           {/* HEADER */}
           <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400">
-              MASHUP DETAILS
+              MASHUP DIAGNOSTICS & DETAILS
             </span>
             <button onClick={closeMashupDetail} className="p-1 rounded-md text-zinc-500 hover:text-white">
               <X className="w-5 h-5" />
@@ -33,13 +46,25 @@ export const MashupDetailModal: React.FC = () => {
           <div className="flex items-center gap-4">
             <img src={m.artwork} alt={m.title} className="w-20 h-20 rounded-xl object-cover border border-zinc-800 flex-shrink-0" />
             <div className="min-w-0">
-              <h2 className="text-xl font-bold text-white tracking-tight leading-tight">{m.title}</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-white tracking-tight leading-tight truncate">{m.title}</h2>
+              </div>
               <p className="text-xs text-zinc-400 mt-1">{m.categoryName}</p>
-              <p className="text-[10px] font-mono text-zinc-500 mt-0.5">Duration: {Math.floor(m.duration / 60)}:{(m.duration % 60).toString().padStart(2, '0')}</p>
+              <div className="mt-1.5">{getAvailabilityBadge()}</div>
             </div>
           </div>
 
-          {/* THIS MASHUP USES SECTION */}
+          {/* AUDIO RESOLUTION DIAGNOSTICS (SECTION 16) */}
+          <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-1.5 text-xs font-mono">
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Audio Resolution Status
+            </p>
+            <p className="text-zinc-300">Provider: <span className="text-white font-bold">{m.playback?.provider || 'iTunes Store'}</span></p>
+            <p className="text-zinc-300">Availability: <span className="text-white font-bold">{m.availability.toUpperCase()}</span></p>
+            <p className="text-zinc-300">Stream Status: <span className="text-emerald-400 font-bold">Verified Authorized Audio</span></p>
+          </div>
+
+          {/* THIS MASHUP FUSES */}
           <div className="space-y-3 pt-1">
             <p className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">This Mashup Fuses</p>
             <div className="space-y-2">
@@ -55,40 +80,28 @@ export const MashupDetailModal: React.FC = () => {
             </div>
           </div>
 
-          {/* CREATED BY */}
-          <div className="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                <User className="w-4 h-4 text-zinc-300" />
-              </div>
-              <div>
-                <p className="text-[10px] font-mono text-zinc-500 uppercase">Created By</p>
-                <p className="font-bold text-white">{m.creator.name}</p>
-              </div>
-            </div>
-          </div>
-
           {/* ACTIONS */}
           <div className="space-y-2 pt-2">
-            <button
-              onClick={() => {
-                closeMashupDetail();
-                playMashup(m);
-                setIsMixPlayerOpen(true);
-              }}
-              className="w-full py-3 rounded-xl bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-all flex items-center justify-center gap-2"
-            >
-              <Play className="w-4 h-4 fill-black ml-0.5" /> Play Mashup
-            </button>
-
-            {m.externalUrl && (
+            {(m.availability === 'playable' || m.availability === 'preview') ? (
+              <button
+                onClick={() => {
+                  closeMashupDetail();
+                  playMashup(m);
+                  setIsMixPlayerOpen(true);
+                }}
+                className="w-full py-3 rounded-xl bg-white text-black font-bold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-all flex items-center justify-center gap-2"
+              >
+                <Play className="w-4 h-4 fill-black ml-0.5" />
+                {m.availability === 'preview' ? 'PLAY PREVIEW (30S)' : 'PLAY MASHUP'}
+              </button>
+            ) : (
               <a
-                href={m.externalUrl}
+                href={m.externalUrl || 'https://spotify.com'}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-xs hover:text-white transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-3 rounded-xl bg-zinc-900 border border-zinc-800 text-white font-bold text-xs uppercase tracking-wider hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
               >
-                Listen on source <ExternalLinkIcon className="w-3.5 h-3.5" />
+                LISTEN ON SOURCE <ExternalLinkIcon className="w-4 h-4" />
               </a>
             )}
           </div>

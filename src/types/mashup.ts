@@ -12,6 +12,8 @@ export type MashupCategory =
   | 'indie_bollywood'
   | 'old_new';
 
+export type MashupAvailability = 'playable' | 'preview' | 'external-only' | 'unavailable';
+
 export interface MashupCategoryMeta {
   id: MashupCategory;
   name: string;
@@ -33,6 +35,23 @@ export interface Creator {
   externalUrl?: string;
 }
 
+export interface MashupPlayback {
+  type: 'audio_url' | 'preview_url' | 'external';
+  url?: string;
+  provider: string;
+  duration?: number;
+  mimeType?: string;
+  attributionUrl?: string;
+}
+
+export interface ResolvedAudio {
+  url: string;
+  provider: string;
+  duration: number;
+  type: 'full' | 'preview';
+  attributionUrl?: string;
+}
+
 export interface Mashup {
   id: string;
   title: string; // e.g. "Husn × Let Her Go"
@@ -41,7 +60,7 @@ export interface Mashup {
   artwork: string;
   creator: Creator;
   sourceTracks: SourceTrack[];
-  duration: number; // in seconds
+  duration?: number; // in seconds
   category: MashupCategory;
   categoryName: string;
   language: string[];
@@ -49,7 +68,8 @@ export interface Mashup {
   releaseDate?: string;
   trendingScore?: number;
   popularity?: number;
-  previewUrl?: string;
+  availability: MashupAvailability;
+  playback?: MashupPlayback;
   externalUrl?: string;
   isFeatured?: boolean;
   createdAt: string;

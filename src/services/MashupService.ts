@@ -1,14 +1,15 @@
-import { Mashup, MashupMix, MashupCategory } from '../types/mashup';
+import { Mashup, MashupMix, MashupCategory, MashupAvailability } from '../types/mashup';
+import { audioResolver } from './engine/AudioResolver';
 
 export class MashupService {
-  private mashups: Mashup[] = [
+  private rawMashups: Omit<Mashup, 'availability'>[] = [
     {
       id: 'mashup-husn-let-her-go',
       title: 'Husn × Let Her Go',
       slug: 'husn-let-her-go',
       description: 'Anuv Jain acoustic feel fused with Passenger folk-pop classic.',
       artwork: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80',
-      creator: { id: 'dj-vibe', name: 'DJ Vibe', image: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=400&auto=format&fit=crop&q=80' },
+      creator: { id: 'dj-vibe', name: 'DJ Vibe' },
       sourceTracks: [
         { title: 'Husn', artist: 'Anuv Jain' },
         { title: 'Let Her Go', artist: 'Passenger' },
@@ -21,7 +22,6 @@ export class MashupService {
       releaseDate: '2026-01-15',
       trendingScore: 98,
       popularity: 95,
-      previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
       externalUrl: 'https://spotify.com',
       isFeatured: true,
       createdAt: '2026-01-15T00:00:00Z',
@@ -33,9 +33,9 @@ export class MashupService {
       slug: 'chaleya-until-i-found-you',
       description: 'Anirudh & Arijit romantic beat blended with Stephen Sanchez retro ballad.',
       artwork: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80',
-      creator: { id: 'dj-nyk', name: 'DJ NYK', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80' },
+      creator: { id: 'dj-nyk', name: 'DJ NYK' },
       sourceTracks: [
-        { title: 'Chaleya', artist: 'Arijit Singh & Anirudh' },
+        { title: 'Chaleya', artist: 'Anirudh Ravichander & Arijit Singh' },
         { title: 'Until I Found You', artist: 'Stephen Sanchez' },
       ],
       duration: 205,
@@ -46,7 +46,6 @@ export class MashupService {
       releaseDate: '2026-02-01',
       trendingScore: 94,
       popularity: 92,
-      previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
       externalUrl: 'https://spotify.com',
       createdAt: '2026-02-01T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
@@ -57,7 +56,7 @@ export class MashupService {
       slug: 'heeriye-perfect',
       description: 'Jasleen Royal & Arijit Singh melody combined with Ed Sheeran ballad.',
       artwork: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80',
-      creator: { id: 'dj-chetas', name: 'DJ Chetas', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80' },
+      creator: { id: 'dj-chetas', name: 'DJ Chetas' },
       sourceTracks: [
         { title: 'Heeriye', artist: 'Jasleen Royal & Arijit Singh' },
         { title: 'Perfect', artist: 'Ed Sheeran' },
@@ -70,7 +69,6 @@ export class MashupService {
       releaseDate: '2026-02-10',
       trendingScore: 91,
       popularity: 89,
-      previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
       externalUrl: 'https://spotify.com',
       createdAt: '2026-02-10T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
@@ -83,7 +81,7 @@ export class MashupService {
       artwork: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&auto=format&fit=crop&q=80',
       creator: { id: 'dj-vibe', name: 'DJ Vibe' },
       sourceTracks: [
-        { title: 'Sajni', artist: 'Arijit Singh & Ram Sampath' },
+        { title: 'Sajni', artist: 'Arijit Singh' },
         { title: 'I Like Me Better', artist: 'Lauv' },
       ],
       duration: 195,
@@ -94,7 +92,7 @@ export class MashupService {
       releaseDate: '2026-03-01',
       trendingScore: 88,
       popularity: 86,
-      previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+      externalUrl: 'https://spotify.com',
       createdAt: '2026-03-01T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
     },
@@ -106,7 +104,7 @@ export class MashupService {
       artwork: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&auto=format&fit=crop&q=80',
       creator: { id: 'dj-nyk', name: 'DJ NYK' },
       sourceTracks: [
-        { title: 'O Maahi', artist: 'Arijit Singh & Pritam' },
+        { title: 'O Maahi', artist: 'Arijit Singh' },
         { title: 'Someone You Loved', artist: 'Lewis Capaldi' },
       ],
       duration: 210,
@@ -117,7 +115,7 @@ export class MashupService {
       releaseDate: '2026-03-12',
       trendingScore: 86,
       popularity: 84,
-      previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+      externalUrl: 'https://spotify.com',
       createdAt: '2026-03-12T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
     },
@@ -129,7 +127,7 @@ export class MashupService {
       artwork: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80',
       creator: { id: 'dj-chetas', name: 'DJ Chetas' },
       sourceTracks: [
-        { title: 'Aankh Marey', artist: 'Neha Kakkar & Mika Singh' },
+        { title: 'Aankh Marey', artist: 'Neha Kakkar' },
         { title: 'Shape of You', artist: 'Ed Sheeran' },
       ],
       duration: 200,
@@ -140,7 +138,7 @@ export class MashupService {
       releaseDate: '2026-04-05',
       trendingScore: 93,
       popularity: 90,
-      previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+      externalUrl: 'https://spotify.com',
       createdAt: '2026-04-05T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
     },
@@ -163,7 +161,7 @@ export class MashupService {
       releaseDate: '2026-04-18',
       trendingScore: 89,
       popularity: 87,
-      previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+      externalUrl: 'https://spotify.com',
       createdAt: '2026-04-18T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
     },
@@ -175,7 +173,7 @@ export class MashupService {
       artwork: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
       creator: { id: 'dj-nyk', name: 'DJ NYK' },
       sourceTracks: [
-        { title: 'Kesariya', artist: 'Arijit Singh & Pritam' },
+        { title: 'Kesariya', artist: 'Pritam & Arijit Singh' },
         { title: 'Golden Hour', artist: 'JVKE' },
       ],
       duration: 228,
@@ -186,90 +184,131 @@ export class MashupService {
       releaseDate: '2026-05-02',
       trendingScore: 87,
       popularity: 85,
-      previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+      externalUrl: 'https://spotify.com',
       createdAt: '2026-05-02T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
     },
   ];
 
+  private resolvedCache: Mashup[] | null = null;
+
+  public async getResolvedMashups(): Promise<Mashup[]> {
+    if (this.resolvedCache) return this.resolvedCache;
+
+    const resolved = await Promise.all(
+      this.rawMashups.map(async (raw) => {
+        const audio = await audioResolver.resolveTrack(raw.sourceTracks[0].artist, raw.sourceTracks[0].title);
+        if (audio) {
+          return {
+            ...raw,
+            availability: 'preview' as MashupAvailability,
+            playback: {
+              type: 'preview_url' as const,
+              url: audio.url,
+              provider: audio.provider,
+              duration: audio.duration,
+              attributionUrl: audio.attributionUrl,
+            },
+          };
+        } else {
+          return {
+            ...raw,
+            availability: 'external-only' as MashupAvailability,
+          };
+        }
+      })
+    );
+
+    this.resolvedCache = resolved;
+    return resolved;
+  }
+
   public async getFeaturedMashup(): Promise<Mashup> {
-    return this.mashups[0];
+    const list = await this.getResolvedMashups();
+    return list[0];
   }
 
   public async getTrendingMashups(): Promise<Mashup[]> {
-    return [...this.mashups].sort((a, b) => (b.trendingScore || 0) - (a.trendingScore || 0));
+    const list = await this.getResolvedMashups();
+    return [...list].sort((a, b) => (b.trendingScore || 0) - (a.trendingScore || 0));
   }
 
   public async getNewMashups(): Promise<Mashup[]> {
-    return [...this.mashups].sort((a, b) => new Date(b.releaseDate || '').getTime() - new Date(a.releaseDate || '').getTime());
+    const list = await this.getResolvedMashups();
+    return [...list].sort((a, b) => new Date(b.releaseDate || '').getTime() - new Date(a.releaseDate || '').getTime());
   }
 
   public async getCategoryMashups(category: MashupCategory): Promise<Mashup[]> {
-    return this.mashups.filter(m => m.category === category || m.category === 'bollywood_english');
+    const list = await this.getResolvedMashups();
+    return list.filter(m => m.category === category || m.category === 'bollywood_english');
   }
 
   public async searchMashups(query: string): Promise<Mashup[]> {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
+    const list = await this.getResolvedMashups();
 
-    // Combination Search (e.g. "Arijit + The Weeknd", "Anuv + Passenger", "Bollywood + English")
     if (q.includes('+') || q.includes('&') || q.includes('x')) {
       const parts = q.split(/[+&x]/).map(p => p.trim());
-      return this.mashups.filter(m => {
+      return list.filter(m => {
         const fullText = `${m.title} ${m.categoryName} ${m.sourceTracks.map(t => `${t.title} ${t.artist}`).join(' ')}`.toLowerCase();
         return parts.every(part => fullText.includes(part));
       });
     }
 
-    return this.mashups.filter(m => {
+    return list.filter(m => {
       const fullText = `${m.title} ${m.creator.name} ${m.categoryName} ${m.sourceTracks.map(t => `${t.title} ${t.artist}`).join(' ')}`.toLowerCase();
       return fullText.includes(q);
     });
   }
 
   public async getMixes(): Promise<MashupMix[]> {
+    const list = await this.getResolvedMashups();
+    // Filter only playable/preview mashups for continuous mixes
+    const playableList = list.filter(m => m.availability === 'preview' || m.availability === 'playable');
+
     return [
       {
         id: 'mix-bollywood-english',
         title: 'BOLLYWOOD × ENGLISH',
-        subtitle: '32 mashups • 1h 12m',
+        subtitle: `${playableList.length} mashups • Continuous Session`,
         description: 'The definitive continuous mix of Hindi and Western pop crossovers.',
         artwork: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80',
         category: 'bollywood_english',
-        mashups: this.mashups,
+        mashups: playableList,
         totalDuration: 4320,
         updatedAt: 'Updated 4 min ago',
       },
       {
         id: 'mix-trending',
         title: 'TRENDING MASHUPS',
-        subtitle: '25 mashups • 58m',
+        subtitle: `${playableList.length} mashups • Top Rated`,
         description: 'Hottest viral mashups exploding across platforms.',
         artwork: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80',
         category: 'bollywood_english',
-        mashups: this.mashups,
+        mashups: playableList,
         totalDuration: 3480,
         updatedAt: 'Updated 12 min ago',
       },
       {
         id: 'mix-desi-party',
         title: 'DESI PARTY',
-        subtitle: '30 mashups • 1h 05m',
+        subtitle: `${playableList.filter(m => m.category === 'desi_party' || m.category === 'bollywood_english').length} mashups • High Energy`,
         description: 'High energy festival & club mashups.',
         artwork: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80',
         category: 'desi_party',
-        mashups: this.mashups.filter(m => m.category === 'desi_party' || m.category === 'bollywood_english'),
+        mashups: playableList.filter(m => m.category === 'desi_party' || m.category === 'bollywood_english'),
         totalDuration: 3900,
         updatedAt: 'Updated 18 min ago',
       },
       {
         id: 'mix-midnight',
         title: 'MIDNIGHT MIX',
-        subtitle: '22 mashups • 48m',
+        subtitle: `${playableList.filter(m => m.category === 'late_night' || m.category === 'sad_hours' || m.category === 'bollywood_english').length} mashups • Late Night`,
         description: 'Atmospheric late night chill mashup session.',
         artwork: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
         category: 'late_night',
-        mashups: this.mashups.filter(m => m.category === 'late_night' || m.category === 'sad_hours' || m.category === 'bollywood_english'),
+        mashups: playableList.filter(m => m.category === 'late_night' || m.category === 'sad_hours' || m.category === 'bollywood_english'),
         totalDuration: 2880,
         updatedAt: 'Updated 25 min ago',
       },

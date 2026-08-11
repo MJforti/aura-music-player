@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { Mashup, MashupMix } from '../types/mashup';
+import { Mashup, MashupMix, ResolvedAudio } from '../types/mashup';
+import { audioResolver } from '../services/engine/AudioResolver';
 
 interface PlaybackContextType {
   currentMashup: Mashup | null;
@@ -11,14 +12,15 @@ interface PlaybackContextType {
   isBuffering: boolean;
   volume: number;
   error: string | null;
+  resolvedAudio: ResolvedAudio | null;
   isMixPlayerOpen: boolean;
   setIsMixPlayerOpen: (open: boolean) => void;
   selectedMashupForDetail: Mashup | null;
   openMashupDetail: (mashup: Mashup) => void;
   closeMashupDetail: () => void;
 
-  playMashup: (mashup: Mashup) => void;
-  playMix: (mix: MashupMix, initialIndex?: number) => void;
+  playMashup: (mashup: Mashup) => Promise<void>;
+  playMix: (mix: MashupMix, initialIndex?: number) => Promise<void>;
   pause: () => void;
   resume: () => void;
   next: () => void;
@@ -35,10 +37,11 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(180);
+  const [duration, setDuration] = useState<number>(30);
   const [isBuffering, setIsBuffering] = useState<boolean>(false);
   const [volume, setVolumeState] = useState<number>(0.85);
   const [error, setError] = useState<string | null>(null);
+  const [resolvedAudio, setResolvedAudio] = useState<ResolvedAudio | null>(null);
   const [isMixPlayerOpen, setIsMixPlayerOpen] = useState<boolean>(false);
   const [selectedMashupForDetail, setSelectedMashupForDetail] = useState<Mashup | null>(null);
 
@@ -57,11 +60,10 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const handleTimeUpdate = () => {
       if (!audio) return;
       setCurrentTime(audio.currentTime);
-      setDuration(audio.duration || 180);
+      setDuration(audio.duration || 30);
     };
 
     const handleEnded = () => {
-      // Auto-advance to next mashup in mix seamlessly!
       if (activeMixRef.current) {
         const nextIdx = activeIndexRef.current + 1;
         if (nextIdx < activeMixRef.current.mashups.length) {
@@ -77,7 +79,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const handleWaiting = () => setIsBuffering(true);
     const handleCanPlay = () => setIsBuffering(false);
     const handleError = () => {
-      setError("Audio stream isn't available right now.");
+      setError("Audio preview stream isn't available for this track.");
       setIsBuffering(false);
       setIsPlaying(false);
     };
@@ -98,17 +100,32 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
   }, []);
 
-  const playMashupDirect = (mashup: Mashup) => {
+  const playMashupDirect = async (mashup: Mashup) => {
     setError(null);
     setIsBuffering(true);
+
+    if (mashup.availability === 'external-only' || mashup.availability === 'unavailable') {
+      setError('This mashup is external-only. Use "Listen on source ↗".');
+      setIsBuffering(false);
+      setIsPlaying(false);
+      return;
+    }
+
+    const resolved = await audioResolver.resolveMashup(mashup);
+    if (!resolved || !resolved.url) {
+      setError('No authorized audio stream available for this mashup.');
+      setIsBuffering(false);
+      setIsPlaying(false);
+      return;
+    }
+
+    setResolvedAudio(resolved);
     setCurrentMashup(mashup);
     setCurrentMix(null);
     setCurrentIndex(0);
 
-    const streamUrl = mashup.previewUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-
     if (audioRef.current) {
-      audioRef.current.src = streamUrl;
+      audioRef.current.src = resolved.url;
       audioRef.current.load();
       audioRef.current
         .play()
@@ -125,20 +142,39 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const playTrackInMix = (mix: MashupMix, index: number) => {
+  const playTrackInMix = async (mix: MashupMix, index: number) => {
     if (!mix.mashups[index]) return;
 
     const mashup = mix.mashups[index];
+    if (mashup.availability === 'external-only' || mashup.availability === 'unavailable') {
+      // Auto-skip unavailable item in mix
+      if (index + 1 < mix.mashups.length) {
+        playTrackInMix(mix, index + 1);
+      } else {
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    const resolved = await audioResolver.resolveMashup(mashup);
+    if (!resolved || !resolved.url) {
+      if (index + 1 < mix.mashups.length) {
+        playTrackInMix(mix, index + 1);
+      } else {
+        setIsPlaying(false);
+      }
+      return;
+    }
+
     setError(null);
     setIsBuffering(true);
+    setResolvedAudio(resolved);
     setCurrentMix(mix);
     setCurrentMashup(mashup);
     setCurrentIndex(index);
 
-    const streamUrl = mashup.previewUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
-
     if (audioRef.current) {
-      audioRef.current.src = streamUrl;
+      audioRef.current.src = resolved.url;
       audioRef.current.load();
       audioRef.current
         .play()
@@ -171,12 +207,12 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const playMashup = useCallback((mashup: Mashup) => {
-    playMashupDirect(mashup);
+  const playMashup = useCallback(async (mashup: Mashup) => {
+    await playMashupDirect(mashup);
   }, []);
 
-  const playMix = useCallback((mix: MashupMix, initialIndex: number = 0) => {
-    playTrackInMix(mix, initialIndex);
+  const playMix = useCallback(async (mix: MashupMix, initialIndex: number = 0) => {
+    await playTrackInMix(mix, initialIndex);
   }, []);
 
   const pause = useCallback(() => {
@@ -239,6 +275,7 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isBuffering,
         volume,
         error,
+        resolvedAudio,
         isMixPlayerOpen,
         setIsMixPlayerOpen,
         selectedMashupForDetail,

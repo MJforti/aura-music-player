@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { usePlayback } from '../../context/PlaybackContext';
 import { mashupService } from '../../services/MashupService';
 import { Mashup } from '../../types/mashup';
-import { Play, Flame, Disc, Music, Moon, Sparkles, ChevronRight, Info } from 'lucide-react';
+import { Play, Flame, ExternalLink, Sparkles, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const DiscoverView: React.FC = () => {
@@ -50,6 +50,39 @@ export const DiscoverView: React.FC = () => {
   }
 
   const isHeroPlaying = currentMashup?.id === featuredMashup.id && isPlaying;
+
+  const renderActionButton = (m: Mashup, isPlayingItem: boolean) => {
+    if (m.availability === 'external-only' || m.availability === 'unavailable') {
+      return (
+        <a
+          href={m.externalUrl || 'https://spotify.com'}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="w-full py-3.5 px-6 rounded-xl bg-zinc-900 border border-zinc-800 text-white font-bold text-xs tracking-wider uppercase hover:bg-zinc-800 transition-all flex items-center justify-center gap-2"
+        >
+          LISTEN ON SOURCE <ExternalLink className="w-4 h-4" />
+        </a>
+      );
+    }
+
+    return (
+      <button
+        onClick={() => {
+          if (isPlayingItem) {
+            setIsMixPlayerOpen(true);
+          } else {
+            playMashup(m);
+            setIsMixPlayerOpen(true);
+          }
+        }}
+        className="w-full py-3.5 px-6 rounded-xl bg-white text-black font-bold text-xs tracking-wider uppercase hover:bg-zinc-200 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm"
+      >
+        <Play className="w-4 h-4 fill-black" />
+        {isPlayingItem ? 'OPEN PLAYER' : m.availability === 'preview' ? 'PLAY PREVIEW (30S)' : 'PLAY MASHUP'}
+      </button>
+    );
+  };
 
   return (
     <div className="pb-36 pt- safe px-4 space-y-8 no-scrollbar">
@@ -100,7 +133,7 @@ export const DiscoverView: React.FC = () => {
             <button
               onClick={() => openMashupDetail(featuredMashup)}
               className="p-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-white"
-              title="View Mashup Details"
+              title="View Diagnostics"
             >
               <Info className="w-4 h-4" />
             </button>
@@ -122,20 +155,7 @@ export const DiscoverView: React.FC = () => {
           </div>
 
           <div className="pt-2">
-            <button
-              onClick={() => {
-                if (isHeroPlaying) {
-                  setIsMixPlayerOpen(true);
-                } else {
-                  playMashup(featuredMashup);
-                  setIsMixPlayerOpen(true);
-                }
-              }}
-              className="w-full py-3.5 px-6 rounded-xl bg-white text-black font-bold text-xs tracking-wider uppercase hover:bg-zinc-200 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm"
-            >
-              <Play className="w-4 h-4 fill-black" />
-              {isHeroPlaying ? 'OPEN MASHUP PLAYER' : 'PLAY MASHUP'}
-            </button>
+            {renderActionButton(featuredMashup, isHeroPlaying)}
           </div>
         </div>
       </motion.div>
@@ -154,8 +174,12 @@ export const DiscoverView: React.FC = () => {
             <div
               key={m.id}
               onClick={() => {
-                playMashup(m);
-                setIsMixPlayerOpen(true);
+                if (m.availability === 'external-only' || m.availability === 'unavailable') {
+                  openMashupDetail(m);
+                } else {
+                  playMashup(m);
+                  setIsMixPlayerOpen(true);
+                }
               }}
               className="flex-shrink-0 w-44 space-y-2 cursor-pointer group"
             >
@@ -167,7 +191,7 @@ export const DiscoverView: React.FC = () => {
                   </div>
                 </div>
                 <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[9px] font-mono text-zinc-300 border border-zinc-800">
-                  {m.categoryName}
+                  {m.availability === 'preview' ? '30s Preview' : 'External'}
                 </div>
               </div>
               <div>
@@ -193,8 +217,12 @@ export const DiscoverView: React.FC = () => {
             <div
               key={m.id}
               onClick={() => {
-                playMashup(m);
-                setIsMixPlayerOpen(true);
+                if (m.availability === 'external-only' || m.availability === 'unavailable') {
+                  openMashupDetail(m);
+                } else {
+                  playMashup(m);
+                  setIsMixPlayerOpen(true);
+                }
               }}
               className="p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 transition-all cursor-pointer flex items-center justify-between group"
             >
@@ -205,9 +233,13 @@ export const DiscoverView: React.FC = () => {
                   <p className="text-xs text-zinc-400 truncate">{m.sourceTracks.map(t => `${t.title} (${t.artist})`).join(' × ')}</p>
                 </div>
               </div>
-              <button className="p-2.5 rounded-xl bg-zinc-800 text-white border border-zinc-700 group-hover:bg-white group-hover:text-black transition-all flex-shrink-0">
-                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-              </button>
+              {m.availability === 'external-only' ? (
+                <span className="text-[10px] font-mono text-zinc-400 border border-zinc-800 px-2 py-1 rounded-lg">External</span>
+              ) : (
+                <button className="p-2.5 rounded-xl bg-zinc-800 text-white border border-zinc-700 group-hover:bg-white group-hover:text-black transition-all flex-shrink-0">
+                  <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                </button>
+              )}
             </div>
           ))}
         </div>
