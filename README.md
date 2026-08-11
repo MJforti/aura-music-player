@@ -1,26 +1,30 @@
-# AURA MIX — Discover what's hot. Hear it mixed.
+# AURA — Bollywood × Global. One perfect mix.
 
-A mobile-first music discovery application centered around continuously generated short-form music mixes and mashups based on the latest trending songs.
+**Discover the mashups you didn't know you needed.**
+
+A dedicated discovery platform centered around **Bollywood, Hindi, English, and crossover mashups** (*Husn × Let Her Go*, *Chaleya × Until I Found You*, *Heeriye × Perfect*, *Sajni × I Like Me Better*, *O Maahi × Someone You Loved*, *Aankh Marey × Shape of You*).
 
 🌐 **Live Vercel Production App**: [https://spotify-who.vercel.app](https://spotify-who.vercel.app)  
 📦 **GitHub Repository**: [https://github.com/MJforti/aura-music-player](https://github.com/MJforti/aura-music-player)
 
 ---
 
-## 🔥 Product Features & Architecture
+## 🌟 Core Product Features
 
-- **Primary Unit = MIX**: Replaced traditional song-centric playback with short-form continuous **Mixes** (`🔥 Global Heat`, `🇮🇳 India Heat`, `📱 Viral Right Now`, `🆕 New & Hot`, `💃 Party`, `🌙 Midnight`, `❤️ Love`, `🎤 Hip-Hop`, `🎸 Indie`).
-- **Continuous Mix Progression**: `MixPlaybackContext` automatically advances to the next track segment in the active mix when a preview finishes, creating a seamless listening session.
-- **Discover Screen**: Hero Card for **🔥 GLOBAL HEAT** (25 tracks, ~4:38 duration, primary "PLAY MIX" CTA) with live timestamps ("Updated 4 min ago").
-- **1-Tap Mixes Catalog**: Explore all 10 mix categories with 1-tap instant streaming.
-- **Clip Search & My Mix**: Search any song/artist, play discovery clips, and tap `+ Add to Mix` to construct custom personal mixes.
-- **Immersive Mix Player**: Full-screen Apple Liquid Glass modal showing current track, mix progress (`0:43 / 4:38`), and **Up Next** snippet preview.
-- **Persistent Mini-Player**: Floating bar above bottom dock displaying active Mix title, track, progress, and play/pause controls.
-- **Installable PWA**: Service Worker shell caching and Web Manifest.
+- **Primary Unit = MASHUP**: Platform centered around authentic Bollywood × English, Hindi × English, Punjabi × English, and Desi crossover mashups.
+- **Ambient Video Background Streaming**: Integrates `desktop_format.mp4` and `mobile_format.mp4` video backdrops into the Hero Featured Mashup (*Husn × Let Her Go*) and full-screen Liquid Glass Mix Player.
+- **5 Core Views**:
+  - `Discover`: Hero Featured Mashup with ambient video backdrop + horizontal category carousels.
+  - `Mashups`: Browse 12 Mashup Categories with source track tags (*Song A × Song B*) and 1-tap play.
+  - `Mixes`: Continuous mashup sessions (`BOLLYWOOD × ENGLISH 1h 12m`, `TRENDING MASHUPS 58m`, `DESI PARTY 1h 05m`, `MIDNIGHT MIX 48m`).
+  - `Search`: Combination search support (`Arijit + The Weeknd`, `Anuv + Passenger`, `Bollywood + English`).
+  - `Me`: Personal Mix Builder ("My Night Drive"), Liked Mashups, Saved Mixes, and History.
+- **Mashup Source Breakdown (`MashupDetailModal`)**: Displays exact source tracks used (*Husn by Anuv Jain × Let Her Go by Passenger*), Creator/DJ info, and `Listen on source ↗` external link.
+- **Continuous Auto-Advance**: Automatically progresses to the next mashup in the active mix or playlist when a track segment finishes.
 
 ---
 
-## 🛠️ Local Development & Deployment
+## 🛠️ Local Development & Build
 
 ```bash
 # Install dependencies
