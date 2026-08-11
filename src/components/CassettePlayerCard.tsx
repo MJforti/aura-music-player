@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRadio } from '../context/RadioContext';
-import { Play, Pause, Disc, Volume2, Radio as RadioIcon, Sparkles } from 'lucide-react';
+import { Play, Pause, Disc, Volume2, Loader2, Music } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const CassettePlayerCard: React.FC = () => {
@@ -15,6 +15,7 @@ export const CassettePlayerCard: React.FC = () => {
     volume,
     setVolume,
     spectrumBars,
+    isLoadingAudio,
   } = useRadio();
 
   const formatTime = (secs: number) => {
@@ -36,8 +37,8 @@ export const CassettePlayerCard: React.FC = () => {
               {currentStation.name} • {currentStation.frequency}
             </span>
           </div>
-          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-            {currentStation.badge}
+          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 flex items-center gap-1">
+            <Music className="w-3 h-3 text-cyan-400" /> REAL SONGS
           </span>
         </div>
 
@@ -51,7 +52,9 @@ export const CassettePlayerCard: React.FC = () => {
 
             {/* LIVE TAPE TICKER SCREEN */}
             <div className="flex-1 mx-4 p-3 rounded-xl bg-black border border-zinc-800 overflow-hidden text-center">
-              <p className="text-[10px] font-mono font-bold text-amber-400/80 uppercase">STATION BROADCAST</p>
+              <p className="text-[10px] font-mono font-bold text-amber-400/80 uppercase">
+                {isLoadingAudio ? 'RESOLVING REAL SONG STREAM...' : 'STATION BROADCAST'}
+              </p>
               <p className="text-sm font-black text-white truncate mt-0.5">{currentTrack.title}</p>
               <p className="text-xs font-semibold text-cyan-400 truncate mt-0.5">{currentTrack.artist}</p>
             </div>
@@ -113,14 +116,21 @@ export const CassettePlayerCard: React.FC = () => {
 
           <button
             onClick={togglePlay}
-            className="px-6 py-3 rounded-2xl bg-amber-400 text-black font-black text-xs uppercase tracking-wider shadow-xl hover:bg-amber-300 active:scale-95 transition-all flex items-center gap-2"
+            disabled={isLoadingAudio}
+            className="px-6 py-3 rounded-2xl bg-amber-400 text-black font-black text-xs uppercase tracking-wider shadow-xl hover:bg-amber-300 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50"
           >
-            {isPlaying ? <Pause className="w-5 h-5 fill-black" /> : <Play className="w-5 h-5 fill-black ml-0.5" />}
-            {isPlaying ? 'PAUSE RADIO' : 'PLAY RADIO'}
+            {isLoadingAudio ? (
+              <Loader2 className="w-5 h-5 animate-spin text-black" />
+            ) : isPlaying ? (
+              <Pause className="w-5 h-5 fill-black" />
+            ) : (
+              <Play className="w-5 h-5 fill-black ml-0.5" />
+            )}
+            {isLoadingAudio ? 'TUNING...' : isPlaying ? 'PAUSE RADIO' : 'PLAY RADIO'}
           </button>
 
           <span className="text-[10px] font-mono text-zinc-400 uppercase border border-zinc-800 px-2 py-1 rounded-md">
-            24/7 STEREO
+            REAL MUSIC
           </span>
         </div>
       </div>

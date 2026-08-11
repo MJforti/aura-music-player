@@ -11,6 +11,7 @@ interface RadioContextType {
   volume: number;
   spectrumBars: number[];
   isHonking: boolean;
+  isLoadingAudio: boolean;
 
   tuneToStation: (stationId: string) => void;
   play: () => void;
@@ -28,13 +29,15 @@ export const RadioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentStation, setCurrentStation] = useState<RadioStation>(stations[0]);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(222);
+  const [duration, setDuration] = useState<number>(30);
   const [volume, setVolumeState] = useState<number>(0.85);
   const [isHonking, setIsHonking] = useState<boolean>(false);
+  const [isLoadingAudio, setIsLoadingAudio] = useState<boolean>(false);
   const [spectrumBars, setSpectrumBars] = useState<number[]>([30, 60, 45, 80, 55, 90, 70, 40, 85, 60, 75, 50, 95, 65, 40, 70]);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const webAudioCtxRef = useRef<AudioContext | null>(null);
+  const audioCacheRef = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     const audio = new Audio();
@@ -44,20 +47,27 @@ export const RadioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const handleTimeUpdate = () => {
       if (!audio) return;
       setCurrentTime(audio.currentTime);
-      setDuration(audio.duration || 222);
+      setDuration(audio.duration || 30);
     };
 
     const handleEnded = () => {
       setIsPlaying(false);
     };
 
+    const handleWaiting = () => setIsLoadingAudio(true);
+    const handleCanPlay = () => setIsLoadingAudio(false);
+
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('waiting', handleWaiting);
+    audio.addEventListener('canplay', handleCanPlay);
 
     return () => {
       audio.pause();
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('waiting', handleWaiting);
+      audio.removeEventListener('canplay', handleCanPlay);
     };
   }, []);
 
@@ -95,7 +105,6 @@ export const RadioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       osc1.type = 'sawtooth';
       osc2.type = 'sawtooth';
 
-      // Authentic Indian Truck Horn Frequency Pair
       osc1.frequency.setValueAtTime(340, ctx.currentTime);
       osc2.frequency.setValueAtTime(440, ctx.currentTime);
 
@@ -119,17 +128,57 @@ export const RadioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
-  const playStationAudio = (station: RadioStation) => {
+  // Resolve Actual Real Song Stream from iTunes API
+  const fetchRealAudioStream = async (track: StationTrack): Promise<string | null> => {
+    const cacheKey = `${track.title}_${track.artist}`;
+    if (audioCacheRef.current.has(cacheKey)) {
+      return audioCacheRef.current.get(cacheKey) || null;
+    }
+
+    try {
+      // Query iTunes Search API for actual real track audio stream
+      const query = track.sourceTracks?.[0] || `${track.title} ${track.artist}`;
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=song&limit=1`;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+
+      const data = await res.json();
+      if (data.results && data.results[0] && data.results[0].previewUrl) {
+        const previewUrl = data.results[0].previewUrl;
+        audioCacheRef.current.set(cacheKey, previewUrl);
+        return previewUrl;
+      }
+    } catch (e) {
+      console.warn('Failed to resolve real song audio:', e);
+    }
+
+    return null;
+  };
+
+  const playStationAudio = async (station: RadioStation) => {
     setCurrentStation(station);
-    const audioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+    setIsLoadingAudio(true);
+
+    const realAudioUrl = await fetchRealAudioStream(station.currentTrack);
+    if (!realAudioUrl) {
+      setIsLoadingAudio(false);
+      setIsPlaying(false);
+      return;
+    }
 
     if (audioRef.current) {
-      audioRef.current.src = audioUrl;
+      audioRef.current.src = realAudioUrl;
       audioRef.current.load();
       audioRef.current
         .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
+        .then(() => {
+          setIsPlaying(true);
+          setIsLoadingAudio(false);
+        })
+        .catch(() => {
+          setIsPlaying(false);
+          setIsLoadingAudio(false);
+        });
     }
   };
 
@@ -141,10 +190,12 @@ export const RadioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const play = useCallback(() => {
-    if (audioRef.current) {
+    if (audioRef.current && audioRef.current.src) {
       audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    } else {
+      playStationAudio(currentStation);
     }
-  }, []);
+  }, [currentStation]);
 
   const pause = useCallback(() => {
     if (audioRef.current) {
@@ -184,6 +235,7 @@ export const RadioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         volume,
         spectrumBars,
         isHonking,
+        isLoadingAudio,
         tuneToStation,
         play,
         pause,
