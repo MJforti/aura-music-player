@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --app-vh: 100vh;
+  }
+
+  body {
+    background-color: #07080B;
+    color: #FAFAFA;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Geist Sans', 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
+  }
+
+  /* Custom scrollbar for minimalist sleek aesthetic */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+@layer utilities {
+  /* Apple Liquid Glass Utility Classes */
+  .glass-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .glass-card-hover {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass-card-hover:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .glass-pill {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .glass-dock {
+    background: rgba(14, 16, 22, 0.75);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Safe area padding helper for modern iPhones */
+.pb-safe {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+.pt-safe {
+  padding-top: max(1.25rem, env(safe-area-inset-top));
+}

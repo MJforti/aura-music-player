@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="auraGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAFAFA" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#8B5CF6" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.9" />
+    </linearGradient>
+    <radialGradient id="glassCircle" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.6" />
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="#07080B" />
+  <circle cx="256" cy="256" r="180" fill="url(#glassCircle)" stroke="rgba(255,255,255,0.2)" stroke-width="4" />
+  <path d="M190 320V192L340 256L190 320Z" fill="url(#auraGlow)" />
+  <circle cx="256" cy="256" r="210" stroke="url(#auraGlow)" stroke-width="2" opacity="0.4" stroke-dasharray="8 8" />
+</svg>

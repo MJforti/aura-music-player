@@ -1,0 +1,17 @@
+{
+  "short_name": "AURA",
+  "name": "AURA Music Player",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512 192x192 96x96 48x48"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#07080B",
+  "theme_color": "#07080B",
+  "display": "standalone",
+  "orientation": "portrait",
+  "description": "Premium Minimalist Liquid Glass Music Player"
+}
