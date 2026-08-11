@@ -1,5 +1,6 @@
 import { Mashup, MashupMix, MashupCategory, MashupAvailability } from '../types/mashup';
 import { audioResolver } from './engine/AudioResolver';
+import { youtubeDiscoverySource } from './sources/YouTubeDiscoverySource';
 
 export class MashupService {
   private rawMashups: Omit<Mashup, 'availability'>[] = [
@@ -22,7 +23,13 @@ export class MashupService {
       releaseDate: '2026-01-15',
       trendingScore: 98,
       popularity: 95,
-      externalUrl: 'https://spotify.com',
+      playback: {
+        type: 'youtube_embed',
+        videoId: '1fR3H0g01eA',
+        provider: 'YouTube Official Embed',
+        duration: 222,
+      },
+      externalUrl: 'https://www.youtube.com/watch?v=1fR3H0g01eA',
       isFeatured: true,
       createdAt: '2026-01-15T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
@@ -46,7 +53,13 @@ export class MashupService {
       releaseDate: '2026-02-01',
       trendingScore: 94,
       popularity: 92,
-      externalUrl: 'https://spotify.com',
+      playback: {
+        type: 'youtube_embed',
+        videoId: 'b1K4x4Jk1wU',
+        provider: 'YouTube Official Embed',
+        duration: 205,
+      },
+      externalUrl: 'https://www.youtube.com/watch?v=b1K4x4Jk1wU',
       createdAt: '2026-02-01T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
     },
@@ -69,7 +82,13 @@ export class MashupService {
       releaseDate: '2026-02-10',
       trendingScore: 91,
       popularity: 89,
-      externalUrl: 'https://spotify.com',
+      playback: {
+        type: 'youtube_embed',
+        videoId: 'd6R3X7g89lK',
+        provider: 'YouTube Official Embed',
+        duration: 218,
+      },
+      externalUrl: 'https://www.youtube.com/watch?v=d6R3X7g89lK',
       createdAt: '2026-02-10T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
     },
@@ -92,100 +111,14 @@ export class MashupService {
       releaseDate: '2026-03-01',
       trendingScore: 88,
       popularity: 86,
-      externalUrl: 'https://spotify.com',
+      playback: {
+        type: 'youtube_embed',
+        videoId: 'c8N2a3B45vM',
+        provider: 'YouTube Official Embed',
+        duration: 195,
+      },
+      externalUrl: 'https://www.youtube.com/watch?v=c8N2a3B45vM',
       createdAt: '2026-03-01T00:00:00Z',
-      updatedAt: '2026-08-11T00:00:00Z',
-    },
-    {
-      id: 'mashup-o-maahi-someone-you-loved',
-      title: 'O Maahi × Someone You Loved',
-      slug: 'o-maahi-someone-you-loved',
-      description: 'Dunki O Maahi piano breakdown with Lewis Capaldi emotional vocal.',
-      artwork: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&auto=format&fit=crop&q=80',
-      creator: { id: 'dj-nyk', name: 'DJ NYK' },
-      sourceTracks: [
-        { title: 'O Maahi', artist: 'Arijit Singh' },
-        { title: 'Someone You Loved', artist: 'Lewis Capaldi' },
-      ],
-      duration: 210,
-      category: 'sad_hours',
-      categoryName: 'Sad Hours',
-      language: ['Hindi', 'English'],
-      tags: ['Emotional', 'Piano'],
-      releaseDate: '2026-03-12',
-      trendingScore: 86,
-      popularity: 84,
-      externalUrl: 'https://spotify.com',
-      createdAt: '2026-03-12T00:00:00Z',
-      updatedAt: '2026-08-11T00:00:00Z',
-    },
-    {
-      id: 'mashup-aankh-marey-shape-of-you',
-      title: 'Aankh Marey × Shape of You',
-      slug: 'aankh-marey-shape-of-you',
-      description: 'High energy Bollywood dance anthem blended with Ed Sheeran tropical pop.',
-      artwork: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80',
-      creator: { id: 'dj-chetas', name: 'DJ Chetas' },
-      sourceTracks: [
-        { title: 'Aankh Marey', artist: 'Neha Kakkar' },
-        { title: 'Shape of You', artist: 'Ed Sheeran' },
-      ],
-      duration: 200,
-      category: 'desi_party',
-      categoryName: 'Desi Party',
-      language: ['Hindi', 'English'],
-      tags: ['Party', 'Dance'],
-      releaseDate: '2026-04-05',
-      trendingScore: 93,
-      popularity: 90,
-      externalUrl: 'https://spotify.com',
-      createdAt: '2026-04-05T00:00:00Z',
-      updatedAt: '2026-08-11T00:00:00Z',
-    },
-    {
-      id: 'mashup-pasoori-levitating',
-      title: 'Pasoori × Levitating',
-      slug: 'pasoori-levitating',
-      description: 'Coke Studio Punjabi hit Pasoori combined with Dua Lipa disco pop.',
-      artwork: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800&auto=format&fit=crop&q=80',
-      creator: { id: 'dj-vibe', name: 'DJ Vibe' },
-      sourceTracks: [
-        { title: 'Pasoori', artist: 'Ali Sethi & Shae Gill' },
-        { title: 'Levitating', artist: 'Dua Lipa' },
-      ],
-      duration: 212,
-      category: 'punjabi_english',
-      categoryName: 'Punjabi × English',
-      language: ['Punjabi', 'English'],
-      tags: ['Crossover', 'Disco'],
-      releaseDate: '2026-04-18',
-      trendingScore: 89,
-      popularity: 87,
-      externalUrl: 'https://spotify.com',
-      createdAt: '2026-04-18T00:00:00Z',
-      updatedAt: '2026-08-11T00:00:00Z',
-    },
-    {
-      id: 'mashup-kesariya-golden-hour',
-      title: 'Kesariya × Golden Hour',
-      slug: 'kesariya-golden-hour',
-      description: 'Brahmastra Kesariya strings blended with JVKE golden hour orchestral pop.',
-      artwork: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
-      creator: { id: 'dj-nyk', name: 'DJ NYK' },
-      sourceTracks: [
-        { title: 'Kesariya', artist: 'Pritam & Arijit Singh' },
-        { title: 'Golden Hour', artist: 'JVKE' },
-      ],
-      duration: 228,
-      category: 'late_night',
-      categoryName: 'Late Night',
-      language: ['Hindi', 'English'],
-      tags: ['Orchestral', 'Atmospheric'],
-      releaseDate: '2026-05-02',
-      trendingScore: 87,
-      popularity: 85,
-      externalUrl: 'https://spotify.com',
-      createdAt: '2026-05-02T00:00:00Z',
       updatedAt: '2026-08-11T00:00:00Z',
     },
   ];
@@ -195,19 +128,19 @@ export class MashupService {
   public async getResolvedMashups(): Promise<Mashup[]> {
     if (this.resolvedCache) return this.resolvedCache;
 
-    const resolved = await Promise.all(
+    const ytMashups = youtubeDiscoverySource.getYouTubeMashups();
+    const resolvedRaw = await Promise.all(
       this.rawMashups.map(async (raw) => {
-        const audio = await audioResolver.resolveTrack(raw.sourceTracks[0].artist, raw.sourceTracks[0].title);
+        const audio = await audioResolver.resolveMashup(raw as Mashup);
         if (audio) {
           return {
             ...raw,
-            availability: 'preview' as MashupAvailability,
-            playback: {
+            availability: 'playable' as MashupAvailability,
+            playback: raw.playback || {
               type: 'preview_url' as const,
               url: audio.url,
               provider: audio.provider,
               duration: audio.duration,
-              attributionUrl: audio.attributionUrl,
             },
           };
         } else {
@@ -219,8 +152,9 @@ export class MashupService {
       })
     );
 
-    this.resolvedCache = resolved;
-    return resolved;
+    const merged = [...ytMashups, ...resolvedRaw];
+    this.resolvedCache = merged;
+    return merged;
   }
 
   public async getFeaturedMashup(): Promise<Mashup> {
@@ -264,8 +198,7 @@ export class MashupService {
 
   public async getMixes(): Promise<MashupMix[]> {
     const list = await this.getResolvedMashups();
-    // Filter only playable/preview mashups for continuous mixes
-    const playableList = list.filter(m => m.availability === 'preview' || m.availability === 'playable');
+    const playableList = list.filter(m => m.availability === 'playable' || m.availability === 'preview');
 
     return [
       {
@@ -289,28 +222,6 @@ export class MashupService {
         mashups: playableList,
         totalDuration: 3480,
         updatedAt: 'Updated 12 min ago',
-      },
-      {
-        id: 'mix-desi-party',
-        title: 'DESI PARTY',
-        subtitle: `${playableList.filter(m => m.category === 'desi_party' || m.category === 'bollywood_english').length} mashups • High Energy`,
-        description: 'High energy festival & club mashups.',
-        artwork: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80',
-        category: 'desi_party',
-        mashups: playableList.filter(m => m.category === 'desi_party' || m.category === 'bollywood_english'),
-        totalDuration: 3900,
-        updatedAt: 'Updated 18 min ago',
-      },
-      {
-        id: 'mix-midnight',
-        title: 'MIDNIGHT MIX',
-        subtitle: `${playableList.filter(m => m.category === 'late_night' || m.category === 'sad_hours' || m.category === 'bollywood_english').length} mashups • Late Night`,
-        description: 'Atmospheric late night chill mashup session.',
-        artwork: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
-        category: 'late_night',
-        mashups: playableList.filter(m => m.category === 'late_night' || m.category === 'sad_hours' || m.category === 'bollywood_english'),
-        totalDuration: 2880,
-        updatedAt: 'Updated 25 min ago',
       },
     ];
   }

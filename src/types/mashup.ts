@@ -36,8 +36,9 @@ export interface Creator {
 }
 
 export interface MashupPlayback {
-  type: 'audio_url' | 'preview_url' | 'external';
+  type: 'youtube_embed' | 'audio_url' | 'preview_url' | 'external';
   url?: string;
+  videoId?: string;
   provider: string;
   duration?: number;
   mimeType?: string;
@@ -45,10 +46,11 @@ export interface MashupPlayback {
 }
 
 export interface ResolvedAudio {
-  url: string;
+  url?: string;
+  videoId?: string;
   provider: string;
   duration: number;
-  type: 'full' | 'preview';
+  type: 'full' | 'preview' | 'youtube';
   attributionUrl?: string;
 }
 

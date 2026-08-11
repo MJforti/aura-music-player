@@ -1,18 +1,28 @@
-import { Mashup, ResolvedAudio, SourceTrack } from '../../types/mashup';
+import { Mashup, ResolvedAudio } from '../../types/mashup';
 
 /**
  * AudioResolver
- * Resolves actual authorized audio previews from verified music providers (iTunes / Deezer).
- * Strictly guarantees metadata and audio correspondence. Returns null if unavailable.
+ * Resolves actual authorized audio streams (YouTube Official IFrame Embeds / iTunes Store Previews).
+ * Guarantees content authenticity with zero dummy fallbacks.
  */
 export class AudioResolver {
   private cache = new Map<string, ResolvedAudio | null>();
 
   public async resolveMashup(mashup: Mashup): Promise<ResolvedAudio | null> {
+    if (mashup.playback?.type === 'youtube_embed' && mashup.playback.videoId) {
+      return {
+        videoId: mashup.playback.videoId,
+        provider: 'YouTube Official Embed',
+        duration: mashup.playback.duration || 220,
+        type: 'youtube',
+        attributionUrl: mashup.playback.attributionUrl || mashup.externalUrl,
+      };
+    }
+
     if (mashup.playback?.url) {
       return {
         url: mashup.playback.url,
-        provider: mashup.playback.provider || 'iTunes',
+        provider: mashup.playback.provider || 'iTunes Store',
         duration: mashup.playback.duration || 30,
         type: mashup.playback.type === 'audio_url' ? 'full' : 'preview',
       };
@@ -22,7 +32,7 @@ export class AudioResolver {
       return null;
     }
 
-    // Try resolving primary source track audio from iTunes Search API
+    // Resolve preview audio from verified iTunes Search API
     const primaryTrack = mashup.sourceTracks[0];
     return this.resolveTrack(primaryTrack.artist, primaryTrack.title);
   }

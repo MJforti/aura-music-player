@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePlayback } from '../../context/PlaybackContext';
-import { ChevronDown, Play, Pause, SkipBack, SkipForward, ListMusic, Info } from 'lucide-react';
+import { ChevronDown, Play, Pause, SkipBack, SkipForward, ListMusic, Info, Youtube } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const MixPlayerModal: React.FC = () => {
@@ -16,6 +16,7 @@ export const MixPlayerModal: React.FC = () => {
     next,
     previous,
     seek,
+    resolvedAudio,
     isMixPlayerOpen,
     setIsMixPlayerOpen,
     openMashupDetail,
@@ -32,6 +33,8 @@ export const MixPlayerModal: React.FC = () => {
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const isYouTube = resolvedAudio?.type === 'youtube' || currentMashup.playback?.type === 'youtube_embed';
+  const videoId = resolvedAudio?.videoId || currentMashup.playback?.videoId;
 
   return (
     <AnimatePresence>
@@ -104,19 +107,34 @@ export const MixPlayerModal: React.FC = () => {
 
         {/* MAIN PLAYER BODY */}
         <div className="relative z-10 flex-1 px-6 flex flex-col justify-center items-center space-y-6 py-4">
-          {/* ARTWORK CARD */}
+          {/* ARTWORK CARD OR YOUTUBE EMBED PLAYER */}
           <motion.div
             key={currentMashup.id}
             initial={{ scale: 0.95, opacity: 0.8 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', damping: 25 }}
-            className="w-64 h-64 sm:w-72 sm:h-72 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl relative group"
+            className="w-full max-w-sm aspect-video sm:w-80 sm:h-80 rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl relative group bg-black"
           >
-            <img
-              src={currentMashup.artwork}
-              alt={currentMashup.title}
-              className="w-full h-full object-cover"
-            />
+            {isYouTube && videoId ? (
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`}
+                title={currentMashup.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+            ) : (
+              <img
+                src={currentMashup.artwork}
+                alt={currentMashup.title}
+                className="w-full h-full object-cover"
+              />
+            )}
+            {isYouTube && (
+              <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-red-600 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-md">
+                <Youtube className="w-3 h-3 fill-current" /> YOUTUBE EMBED
+              </div>
+            )}
           </motion.div>
 
           {/* METADATA */}
@@ -128,26 +146,28 @@ export const MixPlayerModal: React.FC = () => {
           </div>
 
           {/* SCRUBBER */}
-          <div className="w-full max-w-sm space-y-1.5 pt-2">
-            <div
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const ratio = clickX / rect.width;
-                seek(ratio * duration);
-              }}
-              className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden cursor-pointer relative"
-            >
+          {!isYouTube && (
+            <div className="w-full max-w-sm space-y-1.5 pt-2">
               <div
-                className="h-full bg-white rounded-full transition-all duration-200"
-                style={{ width: `${progressPercent}%` }}
-              />
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const clickX = e.clientX - rect.left;
+                  const ratio = clickX / rect.width;
+                  seek(ratio * duration);
+                }}
+                className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden cursor-pointer relative"
+              >
+                <div
+                  className="h-full bg-white rounded-full transition-all duration-200"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs font-mono font-bold text-zinc-400">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
             </div>
-            <div className="flex items-center justify-between text-xs font-mono font-bold text-zinc-400">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-          </div>
+          )}
 
           {/* CONTROLS */}
           <div className="flex items-center justify-center gap-6 pt-2">
@@ -159,12 +179,14 @@ export const MixPlayerModal: React.FC = () => {
               <SkipBack className="w-5 h-5 fill-white" />
             </button>
 
-            <button
-              onClick={isPlaying ? pause : resume}
-              className="p-4 rounded-full bg-white text-black hover:bg-zinc-200 active:scale-95 transition-all shadow-md"
-            >
-              {isPlaying ? <Pause className="w-6 h-6 fill-black" /> : <Play className="w-6 h-6 fill-black ml-0.5" />}
-            </button>
+            {!isYouTube && (
+              <button
+                onClick={isPlaying ? pause : resume}
+                className="p-4 rounded-full bg-white text-black hover:bg-zinc-200 active:scale-95 transition-all shadow-md"
+              >
+                {isPlaying ? <Pause className="w-6 h-6 fill-black" /> : <Play className="w-6 h-6 fill-black ml-0.5" />}
+              </button>
+            )}
 
             <button
               onClick={next}
