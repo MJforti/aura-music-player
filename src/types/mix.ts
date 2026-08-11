@@ -22,7 +22,7 @@ export interface MixCategoryMeta {
 
 export interface MixTrack {
   track: Track;
-  startTime?: number; // segment offset in seconds
+  startTime?: number;
   duration: number; // segment length in seconds (e.g. 30s)
   order: number;
 }
@@ -38,21 +38,21 @@ export interface Mix {
   tracks: MixTrack[];
   duration: number; // total mix length in seconds (e.g. 278s)
   trackCount: number;
-  updatedAt: string; // e.g. "Updated 4 min ago"
+  updatedAt: string;
   isHero?: boolean;
   accentColor?: string;
   isCustom?: boolean;
 }
 
 export const MIX_CATEGORIES: MixCategoryMeta[] = [
-  { id: 'trending', name: '🔥 Trending Now', subtitle: 'The hottest tracks right now', gradient: 'from-orange-500 to-rose-600', iconName: 'Flame' },
-  { id: 'india', name: '🇮🇳 India Heat', subtitle: 'Trending Indian music', gradient: 'from-amber-500 to-red-600', iconName: 'Compass' },
-  { id: 'global', name: '🌎 Global Heat', subtitle: 'Worldwide trending tracks', gradient: 'from-blue-500 to-indigo-600', iconName: 'Globe' },
-  { id: 'viral', name: '📱 Viral Right Now', subtitle: 'Music currently exploding', gradient: 'from-pink-500 to-purple-600', iconName: 'Zap' },
-  { id: 'new_hot', name: '🆕 New & Hot', subtitle: 'Fresh releases gaining attention', gradient: 'from-cyan-500 to-emerald-600', iconName: 'Sparkles' },
-  { id: 'party', name: '💃 Party Mix', subtitle: 'High energy continuous beats', gradient: 'from-purple-600 to-pink-500', iconName: 'Music' },
-  { id: 'midnight', name: '🌙 Midnight Vibes', subtitle: 'Chill & late-night atmosphere', gradient: 'from-indigo-900 to-slate-800', iconName: 'Moon' },
-  { id: 'love', name: '❤️ Love & Romantic', subtitle: 'Emotional trending melodies', gradient: 'from-rose-500 to-pink-600', iconName: 'Heart' },
-  { id: 'hiphop', name: '🎤 Hip-Hop Heat', subtitle: 'Trending rap & hip-hop', gradient: 'from-yellow-500 to-amber-700', iconName: 'Mic' },
-  { id: 'indie', name: '🎸 Indie Hits', subtitle: 'Emerging & independent sounds', gradient: 'from-emerald-600 to-teal-800', iconName: 'Radio' },
+  { id: 'global', name: 'Global Heat', subtitle: 'Top worldwide chart mixes', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Globe' },
+  { id: 'india', name: 'India Heat', subtitle: 'Top Indian playback and indie mixes', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Compass' },
+  { id: 'trending', name: 'Trending Now', subtitle: 'Hottest songs mixed continuously', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Flame' },
+  { id: 'viral', name: 'Viral Trends', subtitle: 'Exploding tracks across social platforms', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Zap' },
+  { id: 'new_hot', name: 'New Releases', subtitle: 'Fresh singles and album cuts mixed', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Disc' },
+  { id: 'party', name: 'Party Beats', subtitle: 'High energy dance and club sets', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Music' },
+  { id: 'midnight', name: 'Midnight Chill', subtitle: 'Late-night ambient and lo-fi mixes', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Moon' },
+  { id: 'love', name: 'Romantic Beats', subtitle: 'Melodic and emotional song sequences', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Heart' },
+  { id: 'hiphop', name: 'Hip-Hop Vault', subtitle: 'Rap and hip-hop chart mixes', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Mic' },
+  { id: 'indie', name: 'Indie Discovery', subtitle: 'Emerging independent artist mixes', gradient: 'from-zinc-900 to-zinc-950', iconName: 'Radio' },
 ];

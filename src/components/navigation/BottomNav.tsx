@@ -19,8 +19,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onChangeTab }) 
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb- safe pointer-events-auto">
-      <div className="max-w-md mx-auto mb-2">
-        <div className="glass-dock rounded-3xl p-1.5 flex items-center justify-around shadow-2xl backdrop-blur-2xl border border-white/10 bg-black/60">
+      <div className="max-w-md mx-auto mb-3">
+        <div className="rounded-2xl p-1.5 flex items-center justify-around shadow-2xl backdrop-blur-2xl border border-zinc-800 bg-zinc-950/90">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -29,19 +29,19 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onChangeTab }) 
               <button
                 key={tab.id}
                 onClick={() => onChangeTab(tab.id)}
-                className={`relative flex flex-col items-center justify-center py-2 px-4 rounded-2xl transition-all duration-300 ${
-                  isActive ? 'text-white font-bold' : 'text-white/40 hover:text-white/70'
+                className={`relative flex flex-col items-center justify-center py-2 px-5 rounded-xl transition-all duration-200 ${
+                  isActive ? 'text-white font-bold' : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="activeTabPill"
-                    className="absolute inset-0 bg-white/15 rounded-2xl border border-white/20"
+                    className="absolute inset-0 bg-zinc-800/90 rounded-xl border border-zinc-700"
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
-                <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'scale-110 text-orange-400' : ''} transition-transform`} />
-                <span className="text-[10px] tracking-wide mt-1 relative z-10">{tab.label}</span>
+                <Icon className={`w-5 h-5 relative z-10 ${isActive ? 'scale-105 text-white' : ''} transition-transform`} />
+                <span className="text-[10px] font-mono tracking-wide mt-1 relative z-10">{tab.label}</span>
               </button>
             );
           })}
