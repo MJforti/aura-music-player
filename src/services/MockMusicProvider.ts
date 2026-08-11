@@ -1,6 +1,7 @@
 import { IMusicProvider } from './MusicProvider';
 import { AudiusMusicProvider } from './AudiusMusicProvider';
 import { SpotifyMusicProvider } from './SpotifyMusicProvider';
+import { ITunesMusicProvider } from './ITunesMusicProvider';
 import {
   Track,
   Artist,
@@ -61,80 +62,6 @@ export const MOCK_TRACKS: Track[] = [
     isTrending: true,
     isNewRelease: true,
     playsCount: 1890300,
-    lyrics: {
-      trackId: 'trk-2',
-      lines: [
-        { time: 0, text: 'Soft piano ambient wave...' },
-        { time: 20, text: 'Watching starlight bend around the room' },
-        { time: 38, text: 'Time moves slower when you fade away' },
-        { time: 55, text: 'Soft vibrations pulsing through the dark' },
-        { time: 75, text: 'Every heartbeat aligned with celestial drift' },
-        { time: 98, text: 'Breathe the ambient aura in' }
-      ]
-    }
-  },
-  {
-    id: 'trk-3',
-    title: 'Velvet Echoes',
-    artistId: 'art-3',
-    artistName: 'Solaris Duo',
-    albumId: 'alb-3',
-    albumName: 'Luminescent Nights',
-    artworkUrl: 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&auto=format&fit=crop&q=80',
-    audioUrl: `${SAMPLE_AUDIO_BASE}3.mp3`,
-    duration: 344,
-    genre: 'Ambient Lo-Fi',
-    accentColor: '#F43F5E',
-    releaseDate: '2025-11-20',
-    isTrending: true,
-    playsCount: 3100450,
-  },
-  {
-    id: 'trk-4',
-    title: 'Quantum Bloom',
-    artistId: 'art-4',
-    artistName: 'Aethel',
-    albumId: 'alb-4',
-    albumName: 'Prism Architecture',
-    artworkUrl: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=800&auto=format&fit=crop&q=80',
-    audioUrl: `${SAMPLE_AUDIO_BASE}4.mp3`,
-    duration: 540,
-    genre: 'Electronic',
-    accentColor: '#10B981',
-    releaseDate: '2026-02-10',
-    isNewRelease: true,
-    playsCount: 940120,
-  },
-  {
-    id: 'trk-5',
-    title: 'Silk & Shadows',
-    artistId: 'art-1',
-    artistName: 'Kora & The Wave',
-    albumId: 'alb-1',
-    albumName: 'Neon Ether',
-    artworkUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80',
-    audioUrl: `${SAMPLE_AUDIO_BASE}5.mp3`,
-    duration: 388,
-    genre: 'Synthwave',
-    accentColor: '#6366F1',
-    releaseDate: '2026-01-15',
-    playsCount: 1240000,
-  },
-  {
-    id: 'trk-6',
-    title: 'Aura Minimal',
-    artistId: 'art-5',
-    artistName: 'Subliminal',
-    albumId: 'alb-5',
-    albumName: 'Pure Tone',
-    artworkUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=800&auto=format&fit=crop&q=80',
-    audioUrl: `${SAMPLE_AUDIO_BASE}6.mp3`,
-    duration: 310,
-    genre: 'Minimalist',
-    accentColor: '#F59E0B',
-    releaseDate: '2026-02-05',
-    isTrending: true,
-    playsCount: 4120000,
   }
 ];
 
@@ -146,16 +73,7 @@ export const MOCK_ARTISTS: Artist[] = [
     bio: 'Electronic synthwave duo crafting immersive sonic landscapes.',
     monthlyListeners: 1450200,
     genres: ['Synthwave', 'Electronic'],
-    popularTrackIds: ['trk-1', 'trk-5']
-  },
-  {
-    id: 'art-2',
-    name: 'Lina Vance',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
-    bio: 'Atmospheric vocal and ambient producer.',
-    monthlyListeners: 2310800,
-    genres: ['Chillout', 'Ambient'],
-    popularTrackIds: ['trk-2']
+    popularTrackIds: ['trk-1']
   }
 ];
 
@@ -168,7 +86,7 @@ export const MOCK_ALBUMS: Album[] = [
     artworkUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
     releaseYear: 2026,
     genre: 'Synthwave',
-    trackIds: ['trk-1', 'trk-5']
+    trackIds: ['trk-1']
   }
 ];
 
@@ -178,7 +96,7 @@ export const MOCK_PLAYLISTS: Playlist[] = [
     title: 'Liquid Glass Sessions',
     description: 'Ultra-smooth ambient, synthwave, and chillout tracks.',
     coverUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
-    trackIds: ['trk-1', 'trk-2', 'trk-6'],
+    trackIds: ['trk-1', 'trk-2'],
     createdAt: '2026-01-01'
   }
 ];
@@ -186,15 +104,12 @@ export const MOCK_PLAYLISTS: Playlist[] = [
 export class MockMusicProvider implements IMusicProvider {
   private lastUpdated: string = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  async getHomeFeed(forceRefresh: boolean = false): Promise<HomeFeed> {
-    if (forceRefresh) {
-      this.lastUpdated = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
+  async getHomeFeed(): Promise<HomeFeed> {
     return {
-      recentlyPlayed: MOCK_TRACKS.slice(0, 4),
-      newReleases: MOCK_TRACKS.filter((t) => t.isNewRelease),
-      trending: MOCK_TRACKS.filter((t) => t.isTrending),
-      recommendations: MOCK_TRACKS.slice(2, 6),
+      recentlyPlayed: MOCK_TRACKS,
+      newReleases: MOCK_TRACKS,
+      trending: MOCK_TRACKS,
+      recommendations: MOCK_TRACKS,
       popularAlbums: MOCK_ALBUMS,
       popularArtists: MOCK_ARTISTS,
       recentlyAdded: MOCK_TRACKS,
@@ -206,141 +121,89 @@ export class MockMusicProvider implements IMusicProvider {
     const q = query.toLowerCase().trim();
     if (!q) return { tracks: [], artists: [], albums: [], playlists: [] };
 
-    const tracks = MOCK_TRACKS.filter(
-      (t) => t.title.toLowerCase().includes(q) || t.artistName.toLowerCase().includes(q) || t.genre.toLowerCase().includes(q)
-    );
-    const artists = MOCK_ARTISTS.filter((a) => a.name.toLowerCase().includes(q));
-    const albums = MOCK_ALBUMS.filter((alb) => alb.title.toLowerCase().includes(q));
-    const playlists = MOCK_PLAYLISTS.filter((p) => p.title.toLowerCase().includes(q));
-
-    return { tracks, artists, albums, playlists };
+    const tracks = MOCK_TRACKS.filter((t) => t.title.toLowerCase().includes(q) || t.artistName.toLowerCase().includes(q));
+    return { tracks, artists: MOCK_ARTISTS, albums: MOCK_ALBUMS, playlists: MOCK_PLAYLISTS };
   }
 
-  async getNewReleases(): Promise<Track[]> {
-    return MOCK_TRACKS.filter((t) => t.isNewRelease);
-  }
-
-  async getTrending(): Promise<Track[]> {
-    return MOCK_TRACKS.filter((t) => t.isTrending);
-  }
-
-  async getRecommendations(): Promise<Track[]> {
-    return MOCK_TRACKS.slice(0, 4);
-  }
-
-  async getTrack(id: string): Promise<Track | null> {
-    return MOCK_TRACKS.find((t) => t.id === id) || null;
-  }
-
-  async getAlbum(id: string): Promise<{ album: Album; tracks: Track[] } | null> {
-    const album = MOCK_ALBUMS.find((a) => a.id === id);
-    if (!album) return null;
-    return { album, tracks: MOCK_TRACKS.filter((t) => album.trackIds.includes(t.id)) };
-  }
-
-  async getArtist(id: string): Promise<{ artist: Artist; tracks: Track[]; albums: Album[] } | null> {
-    const artist = MOCK_ARTISTS.find((a) => a.id === id);
-    if (!artist) return null;
-    return { artist, tracks: MOCK_TRACKS.filter((t) => t.artistId === id), albums: MOCK_ALBUMS.filter((a) => a.artistId === id) };
-  }
-
-  async getPlaylist(id: string): Promise<{ playlist: Playlist; tracks: Track[] } | null> {
-    const playlist = MOCK_PLAYLISTS.find((p) => p.id === id);
-    if (!playlist) return null;
-    return { playlist, tracks: MOCK_TRACKS.filter((t) => playlist.trackIds.includes(t.id)) };
-  }
-
-  async getStreamUrl(trackId: string): Promise<string> {
-    const track = await this.getTrack(trackId);
-    return track ? track.audioUrl : `${SAMPLE_AUDIO_BASE}1.mp3`;
-  }
+  async getNewReleases(): Promise<Track[]> { return MOCK_TRACKS; }
+  async getTrending(): Promise<Track[]> { return MOCK_TRACKS; }
+  async getRecommendations(): Promise<Track[]> { return MOCK_TRACKS; }
+  async getTrack(id: string): Promise<Track | null> { return MOCK_TRACKS.find(t => t.id === id) || null; }
+  async getAlbum(id: string): Promise<{ album: Album; tracks: Track[] } | null> { return { album: MOCK_ALBUMS[0], tracks: MOCK_TRACKS }; }
+  async getArtist(id: string): Promise<{ artist: Artist; tracks: Track[]; albums: Album[] } | null> { return { artist: MOCK_ARTISTS[0], tracks: MOCK_TRACKS, albums: MOCK_ALBUMS }; }
+  async getPlaylist(id: string): Promise<{ playlist: Playlist; tracks: Track[] } | null> { return { playlist: MOCK_PLAYLISTS[0], tracks: MOCK_TRACKS }; }
+  async getStreamUrl(trackId: string): Promise<string> { return `${SAMPLE_AUDIO_BASE}1.mp3`; }
 }
 
-export class HybridMusicProvider implements IMusicProvider {
-  private mockProvider = new MockMusicProvider();
-  private audiusProvider = new AudiusMusicProvider();
+export class UniversalMusicProvider implements IMusicProvider {
+  private itunesProvider = new ITunesMusicProvider();
   private spotifyProvider = new SpotifyMusicProvider();
+  private audiusProvider = new AudiusMusicProvider();
 
-  async getHomeFeed(forceRefresh?: boolean): Promise<HomeFeed> {
-    const mockFeed = await this.mockProvider.getHomeFeed(forceRefresh);
-    const audiusFeed = await this.audiusProvider.getHomeFeed();
+  async getHomeFeed(): Promise<HomeFeed> {
+    const itunesFeed = await this.itunesProvider.getHomeFeed();
     const spotifyFeed = await this.spotifyProvider.getHomeFeed();
 
-    const spotifyNew = spotifyFeed?.newReleases || [];
-    const audiusNew = audiusFeed?.newReleases || [];
-
     return {
-      recentlyPlayed: mockFeed.recentlyPlayed,
-      newReleases: [...spotifyNew, ...audiusNew, ...mockFeed.newReleases].slice(0, 10),
-      trending: audiusFeed.trending.length > 0 ? audiusFeed.trending : mockFeed.trending,
-      recommendations: audiusFeed.recommendations.length > 0 ? audiusFeed.recommendations : mockFeed.recommendations,
-      popularAlbums: MOCK_ALBUMS,
-      popularArtists: MOCK_ARTISTS,
-      recentlyAdded: mockFeed.recentlyAdded,
+      recentlyPlayed: itunesFeed.recentlyPlayed,
+      newReleases: [...itunesFeed.newReleases, ...spotifyFeed.newReleases].slice(0, 10),
+      trending: [...itunesFeed.trending, ...spotifyFeed.trending].slice(0, 10),
+      recommendations: [...itunesFeed.recommendations, ...spotifyFeed.recommendations].slice(0, 10),
+      popularAlbums: [...itunesFeed.popularAlbums, ...spotifyFeed.popularAlbums].slice(0, 10),
+      popularArtists: itunesFeed.popularArtists,
+      recentlyAdded: itunesFeed.recentlyAdded,
       lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
   }
 
-  async search(query: string, category?: string): Promise<SearchResult> {
+  async search(query: string): Promise<SearchResult> {
+    const itunesRes = await this.itunesProvider.search(query);
     const spotifyRes = await this.spotifyProvider.search(query);
-    const mockRes = await this.mockProvider.search(query);
-    const audiusRes = await this.audiusProvider.search(query);
 
-    const tracks = [
-      ...(spotifyRes?.tracks || []),
-      ...mockRes.tracks,
-      ...audiusRes.tracks,
-    ];
+    const tracks = [...itunesRes.tracks, ...(spotifyRes?.tracks || [])];
+    const artists = [...itunesRes.artists, ...(spotifyRes?.artists || [])];
+    const albums = [...itunesRes.albums, ...(spotifyRes?.albums || [])];
 
-    return {
-      tracks,
-      artists: spotifyRes?.artists?.length ? spotifyRes.artists : mockRes.artists,
-      albums: spotifyRes?.albums?.length ? spotifyRes.albums : mockRes.albums,
-      playlists: mockRes.playlists,
-    };
+    return { tracks, artists, albums, playlists: [] };
   }
 
   async getNewReleases(): Promise<Track[]> {
-    const live = await this.audiusProvider.getNewReleases();
-    return live.length > 0 ? live : this.mockProvider.getNewReleases();
+    return this.itunesProvider.getNewReleases();
   }
 
   async getTrending(): Promise<Track[]> {
-    const live = await this.audiusProvider.getTrending();
-    return live.length > 0 ? live : this.mockProvider.getTrending();
+    return this.itunesProvider.getTrending();
   }
 
-  async getRecommendations(): Promise<Track[]> {
-    return this.mockProvider.getRecommendations();
+  async getRecommendations(seedTrackId?: string): Promise<Track[]> {
+    return this.itunesProvider.getRecommendations();
   }
 
   async getTrack(id: string): Promise<Track | null> {
+    if (id.startsWith('itunes-')) return this.itunesProvider.getTrack(id);
     const spotify = await this.spotifyProvider.getTrack(id);
     if (spotify) return spotify;
-    const mock = await this.mockProvider.getTrack(id);
-    if (mock) return mock;
-    return this.audiusProvider.getTrack(id);
+    return this.itunesProvider.getTrack(id);
   }
 
   async getAlbum(id: string): Promise<{ album: Album; tracks: Track[] } | null> {
-    return this.mockProvider.getAlbum(id);
+    if (id.startsWith('album-')) return this.itunesProvider.getAlbum(id);
+    return this.spotifyProvider.getAlbum(id);
   }
 
   async getArtist(id: string): Promise<{ artist: Artist; tracks: Track[]; albums: Album[] } | null> {
-    return this.mockProvider.getArtist(id);
+    if (id.startsWith('artist-')) return this.itunesProvider.getArtist(id);
+    return this.spotifyProvider.getArtist(id);
   }
 
   async getPlaylist(id: string): Promise<{ playlist: Playlist; tracks: Track[] } | null> {
-    return this.mockProvider.getPlaylist(id);
+    return this.spotifyProvider.getPlaylist(id);
   }
 
   async getStreamUrl(trackId: string): Promise<string> {
-    const spotifyUrl = await this.spotifyProvider.getStreamUrl(trackId);
-    if (spotifyUrl) return spotifyUrl;
-    const mock = await this.mockProvider.getTrack(trackId);
-    if (mock) return mock.audioUrl;
-    return this.audiusProvider.getStreamUrl(trackId);
+    if (trackId.startsWith('itunes-')) return this.itunesProvider.getStreamUrl(trackId);
+    return this.spotifyProvider.getStreamUrl(trackId);
   }
 }
 
-export const musicProvider = new SpotifyMusicProvider();
+export const musicProvider = new UniversalMusicProvider();
