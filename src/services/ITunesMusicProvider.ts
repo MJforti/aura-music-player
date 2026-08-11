@@ -11,12 +11,13 @@ import {
 /**
  * ITunesMusicProvider
  * Universal Music Engine querying Apple iTunes Search API.
- * Provides 100% free, legal access to ALL Global (English) & Indian (Bollywood/Punjabi) songs,
+ * Provides 100% free, legal real-time access to ALL Global (English),
+ * Indian (Bollywood, Punjabi, Tamil, Telugu, Indian Indie) & International songs,
  * artists, albums, high-res artwork, and streamable audio previews.
  * No API key or subscription required!
  */
 export class ITunesMusicProvider implements IMusicProvider {
-  private async fetchITunes(term: string, entity: string = 'song', limit: number = 20) {
+  private async fetchITunes(term: string, entity: string = 'song', limit: number = 50) {
     try {
       const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=${entity}&limit=${limit}`;
       const res = await fetch(url);
@@ -43,12 +44,12 @@ export class ITunesMusicProvider implements IMusicProvider {
       artworkUrl: artwork,
       audioUrl: item.previewUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
       duration: Math.round((item.trackTimeMillis || 180000) / 1000),
-      genre: item.primaryGenreName || 'Pop',
+      genre: item.primaryGenreName || 'Music',
       accentColor: '#8B5CF6',
       releaseDate: item.releaseDate || new Date().toISOString(),
       isTrending: true,
       isNewRelease: true,
-      playsCount: Math.floor(Math.random() * 5000000) + 1000000,
+      playsCount: Math.floor(Math.random() * 8000000) + 1000000,
     };
   }
 
@@ -57,9 +58,9 @@ export class ITunesMusicProvider implements IMusicProvider {
       id: `artist-${item.artistId || item.artistName}`,
       name: item.artistName || item.name || 'Artist',
       avatarUrl: `https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80`,
-      bio: `Popular Artist on Global & Indian Charts (${item.primaryGenreName || 'Music'}).`,
-      monthlyListeners: Math.floor(Math.random() * 20000000) + 5000000,
-      genres: [item.primaryGenreName || 'Indian Pop', 'Trending'],
+      bio: `Official Artist on Global & Indian Charts (${item.primaryGenreName || 'Music'}).`,
+      monthlyListeners: Math.floor(Math.random() * 30000000) + 5000000,
+      genres: [item.primaryGenreName || 'Popular', 'Trending'],
       popularTrackIds: [],
     };
   }
@@ -76,45 +77,51 @@ export class ITunesMusicProvider implements IMusicProvider {
       artistName: item.artistName || '',
       artworkUrl: artwork,
       releaseYear: parseInt(item.releaseDate?.split('-')[0] || '2026'),
-      genre: item.primaryGenreName || 'Pop',
+      genre: item.primaryGenreName || 'Music',
       trackIds: [],
     };
   }
 
   async getHomeFeed(): Promise<HomeFeed> {
-    const [bollywoodRes, globalHitsRes, punjabiRes] = await Promise.all([
-      this.fetchITunes('Arijit Singh', 'song', 8),
-      this.fetchITunes('Taylor Swift', 'song', 8),
-      this.fetchITunes('Diljit Dosanjh', 'song', 8),
+    const [bollywoodRes, globalHitsRes, punjabiRes, indieRes, hipHopRes] = await Promise.all([
+      this.fetchITunes('Arijit Singh Pritam Shreya Ghoshal AR Rahman', 'song', 20),
+      this.fetchITunes('Taylor Swift The Weeknd Billie Eilish Ed Sheeran', 'song', 20),
+      this.fetchITunes('Diljit Dosanjh Karan Aujla AP Dhillon Badshah', 'song', 20),
+      this.fetchITunes('Prateek Kuhad Anuv Jain Jasleen Royal Sid Sriram', 'song', 15),
+      this.fetchITunes('Drake Travis Scott Kendrick Lamar Post Malone', 'song', 15),
     ]);
 
     const bollywoodTracks = bollywoodRes?.results ? bollywoodRes.results.map((t: any) => this.mapITunesTrack(t)) : [];
     const globalTracks = globalHitsRes?.results ? globalHitsRes.results.map((t: any) => this.mapITunesTrack(t)) : [];
     const punjabiTracks = punjabiRes?.results ? punjabiRes.results.map((t: any) => this.mapITunesTrack(t)) : [];
+    const indieTracks = indieRes?.results ? indieRes.results.map((t: any) => this.mapITunesTrack(t)) : [];
+    const hipHopTracks = hipHopRes?.results ? hipHopRes.results.map((t: any) => this.mapITunesTrack(t)) : [];
 
-    const allTracks = [...bollywoodTracks, ...globalTracks, ...punjabiTracks];
+    const allTracks = [...bollywoodTracks, ...globalTracks, ...punjabiTracks, ...indieTracks, ...hipHopTracks];
 
     const popularAlbums: Album[] = bollywoodRes?.results
       ? bollywoodRes.results.map((t: any) => this.mapITunesAlbum(t))
       : [];
 
     const popularArtists: Artist[] = [
-      { id: 'art-arijit', name: 'Arijit Singh', avatarUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80', bio: 'King of Indian Playback Singing.', monthlyListeners: 45000000, genres: ['Bollywood', 'Romantic'], popularTrackIds: [] },
-      { id: 'art-taylor', name: 'Taylor Swift', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80', bio: 'Global Pop Icon & Songwriter.', monthlyListeners: 98000000, genres: ['Pop', 'Indie Folk'], popularTrackIds: [] },
-      { id: 'art-diljit', name: 'Diljit Dosanjh', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80', bio: 'Global Punjabi Music Superstar.', monthlyListeners: 22000000, genres: ['Punjabi', 'Bhangra'], popularTrackIds: [] },
-      { id: 'art-weeknd', name: 'The Weeknd', avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=600&auto=format&fit=crop&q=80', bio: 'R&B & Synth-Pop Megastar.', monthlyListeners: 85000000, genres: ['R&B', 'Synth-Pop'], popularTrackIds: [] },
-      { id: 'art-rahman', name: 'A.R. Rahman', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80', bio: 'Oscar Winning Indian Music Maestro.', monthlyListeners: 30000000, genres: ['Classical', 'Bollywood'], popularTrackIds: [] },
-      { id: 'art-drake', name: 'Drake', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80', bio: 'Hip-Hop & Rap Icon.', monthlyListeners: 78000000, genres: ['Hip-Hop', 'Rap'], popularTrackIds: [] },
+      { id: 'art-arijit', name: 'Arijit Singh', avatarUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80', bio: 'King of Indian Playback Singing.', monthlyListeners: 48000000, genres: ['Bollywood', 'Romantic'], popularTrackIds: [] },
+      { id: 'art-taylor', name: 'Taylor Swift', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80', bio: 'Global Pop Icon & Songwriter.', monthlyListeners: 99000000, genres: ['Pop', 'Indie Folk'], popularTrackIds: [] },
+      { id: 'art-diljit', name: 'Diljit Dosanjh', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80', bio: 'Global Punjabi Music Superstar.', monthlyListeners: 24000000, genres: ['Punjabi', 'Bhangra'], popularTrackIds: [] },
+      { id: 'art-weeknd', name: 'The Weeknd', avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=600&auto=format&fit=crop&q=80', bio: 'R&B & Synth-Pop Megastar.', monthlyListeners: 88000000, genres: ['R&B', 'Synth-Pop'], popularTrackIds: [] },
+      { id: 'art-rahman', name: 'A.R. Rahman', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80', bio: 'Oscar Winning Indian Music Maestro.', monthlyListeners: 32000000, genres: ['Classical', 'Bollywood'], popularTrackIds: [] },
+      { id: 'art-drake', name: 'Drake', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80', bio: 'Hip-Hop & Rap Icon.', monthlyListeners: 80000000, genres: ['Hip-Hop', 'Rap'], popularTrackIds: [] },
+      { id: 'art-shreya', name: 'Shreya Ghoshal', avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600&auto=format&fit=crop&q=80', bio: 'Melody Queen of India.', monthlyListeners: 35000000, genres: ['Bollywood', 'Classical'], popularTrackIds: [] },
+      { id: 'art-coldplay', name: 'Coldplay', avatarUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&auto=format&fit=crop&q=80', bio: 'Legendary British Rock & Pop Band.', monthlyListeners: 75000000, genres: ['Alternative', 'Pop Rock'], popularTrackIds: [] },
     ];
 
     return {
-      recentlyPlayed: allTracks.slice(0, 4),
-      newReleases: bollywoodTracks.slice(0, 6),
-      trending: globalTracks.slice(0, 6),
-      recommendations: punjabiTracks.slice(0, 6),
-      popularAlbums: popularAlbums.slice(0, 8),
+      recentlyPlayed: allTracks.slice(0, 8),
+      newReleases: bollywoodTracks.concat(globalTracks).slice(0, 15),
+      trending: globalTracks.concat(punjabiTracks).slice(0, 15),
+      recommendations: indieTracks.concat(hipHopTracks).slice(0, 15),
+      popularAlbums: popularAlbums.slice(0, 15),
       popularArtists,
-      recentlyAdded: allTracks.slice(6, 14),
+      recentlyAdded: allTracks.slice(10, 30),
       lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
   }
@@ -125,9 +132,9 @@ export class ITunesMusicProvider implements IMusicProvider {
     }
 
     const [trackRes, artistRes, albumRes] = await Promise.all([
-      this.fetchITunes(query, 'song', 15),
-      this.fetchITunes(query, 'musicArtist', 6),
-      this.fetchITunes(query, 'album', 6),
+      this.fetchITunes(query, 'song', 50),
+      this.fetchITunes(query, 'musicArtist', 15),
+      this.fetchITunes(query, 'album', 15),
     ]);
 
     const tracks: Track[] = trackRes?.results ? trackRes.results.map((t: any) => this.mapITunesTrack(t)) : [];
@@ -160,7 +167,7 @@ export class ITunesMusicProvider implements IMusicProvider {
 
   async getAlbum(id: string): Promise<{ album: Album; tracks: Track[] } | null> {
     const term = id.replace('album-', '');
-    const res = await this.fetchITunes(term, 'song', 15);
+    const res = await this.fetchITunes(term, 'song', 25);
     if (!res?.results?.length) return null;
 
     const album = this.mapITunesAlbum(res.results[0]);
@@ -170,7 +177,7 @@ export class ITunesMusicProvider implements IMusicProvider {
 
   async getArtist(id: string): Promise<{ artist: Artist; tracks: Track[]; albums: Album[] } | null> {
     const term = id.replace('artist-', '');
-    const res = await this.fetchITunes(term, 'song', 15);
+    const res = await this.fetchITunes(term, 'song', 25);
     if (!res?.results?.length) return null;
 
     const artist = this.mapITunesArtist(res.results[0]);
