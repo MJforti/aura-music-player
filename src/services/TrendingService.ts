@@ -1,24 +1,29 @@
+import { multiSourceManager } from './engine/MultiSourceDiscoveryManager';
 import { catalogManager } from './CatalogManager';
 import { Track } from '../types/catalog';
 
 /**
  * TrendingService
- * Modular service calculating real-time popularity signals across categories.
+ * Consumes multi-source aggregated signals (iTunes + Deezer + Spotify)
+ * to compute trending tracks for Mix generation.
  */
 export class TrendingService {
   async getTrendingGlobal(): Promise<Track[]> {
-    const res = await catalogManager.search('Taylor Swift The Weeknd Drake Coldplay Billie Eilish', { limit: 25 });
-    return res.tracks.items;
+    const canonical = await multiSourceManager.getTrendingAggregated();
+    if (canonical.length > 0) return canonical as Track[];
+    return (await catalogManager.search('Taylor Swift The Weeknd Drake Coldplay Billie Eilish', { limit: 25 })).tracks.items;
   }
 
   async getTrendingIndia(): Promise<Track[]> {
-    const res = await catalogManager.search('Arijit Singh Pritam Diljit Dosanjh AR Rahman Shreya Ghoshal Badshah', { limit: 25 });
-    return res.tracks.items;
+    const res = await multiSourceManager.searchAll('Arijit Singh Pritam Diljit Dosanjh AR Rahman Shreya Ghoshal Badshah');
+    if (res.length > 0) return res as Track[];
+    return (await catalogManager.search('Arijit Singh Pritam Diljit Dosanjh AR Rahman Shreya Ghoshal Badshah', { limit: 25 })).tracks.items;
   }
 
   async getTrendingViral(): Promise<Track[]> {
-    const res = await catalogManager.search('Karan Aujla AP Dhillon Divine Badshah Travis Scott', { limit: 20 });
-    return res.tracks.items;
+    const res = await multiSourceManager.searchAll('Karan Aujla AP Dhillon Divine Badshah Travis Scott');
+    if (res.length > 0) return res as Track[];
+    return (await catalogManager.search('Karan Aujla AP Dhillon Divine Badshah Travis Scott', { limit: 20 })).tracks.items;
   }
 
   async getNewAndHot(): Promise<Track[]> {
@@ -39,8 +44,8 @@ export class TrendingService {
       indie: 'Prateek Kuhad Anuv Jain Jasleen Royal Phoebus',
     };
     const q = queryMap[category] || 'Popular Chart';
-    const res = await catalogManager.search(q, { limit: 20 });
-    return res.tracks.items;
+    const res = await multiSourceManager.searchAll(q);
+    return res.length > 0 ? (res as Track[]) : (await catalogManager.search(q, { limit: 20 })).tracks.items;
   }
 }
 

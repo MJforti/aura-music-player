@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { useUser } from '../../context/UserContext';
 import { useMixPlayback } from '../../context/MixPlaybackContext';
 import { mixGenerator } from '../../services/MixGenerator';
-import { Play, Plus, Trash2, User, Music } from 'lucide-react';
+import { Play, Plus, Trash2, User, Music, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { AdminHealthModal } from '../modals/AdminHealthModal';
 
 export const MeView: React.FC = () => {
   const { customPlaylists, likedTrackIds, createPlaylist, deletePlaylist } = useUser();
   const { playMix, setIsMixPlayerOpen } = useMixPlayback();
   const [newMixTitle, setNewMixTitle] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showHealthModal, setShowHealthModal] = useState(false);
 
   const handleCreateMix = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,12 +50,21 @@ export const MeView: React.FC = () => {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="px-3 py-2 rounded-xl bg-white text-black text-xs font-bold hover:bg-zinc-200 transition-all flex items-center gap-1.5 shadow-sm"
-        >
-          <Plus className="w-4 h-4" /> New Mix
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowHealthModal(true)}
+            className="p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-all"
+            title="Source Health Dashboard"
+          >
+            <Activity className="w-4 h-4 text-emerald-400" />
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-3 py-2 rounded-xl bg-white text-black text-xs font-bold hover:bg-zinc-200 transition-all flex items-center gap-1.5 shadow-sm"
+          >
+            <Plus className="w-4 h-4" /> New Mix
+          </button>
+        </div>
       </div>
 
       {/* MY MIXES SECTION */}
@@ -156,6 +167,8 @@ export const MeView: React.FC = () => {
           </motion.div>
         </div>
       )}
+      {/* SOURCE HEALTH MODAL */}
+      <AdminHealthModal isOpen={showHealthModal} onClose={() => setShowHealthModal(false)} />
     </div>
   );
 };
