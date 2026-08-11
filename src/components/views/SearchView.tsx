@@ -38,7 +38,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ onOpenDetail }) => {
 
     setSearching(true);
     const timer = setTimeout(async () => {
-      const res = await musicProvider.search(query, activeCategory);
+      const res = await musicProvider.search(query);
       setResults(res);
       setSearching(false);
     }, 180);

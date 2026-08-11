@@ -343,4 +343,4 @@ export class HybridMusicProvider implements IMusicProvider {
   }
 }
 
-export const musicProvider = new HybridMusicProvider();
+export const musicProvider = new SpotifyMusicProvider();

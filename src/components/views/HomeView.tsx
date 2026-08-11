@@ -22,7 +22,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenDetail }) => {
   const loadFeed = async (forceRefresh: boolean = false) => {
     if (forceRefresh) setRefreshing(true);
     try {
-      const data = await musicProvider.getHomeFeed(forceRefresh);
+      const data = await musicProvider.getHomeFeed();
       setFeed(data);
     } catch (e) {
       console.error('Failed to load home feed', e);
