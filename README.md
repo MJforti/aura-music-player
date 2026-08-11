@@ -1,42 +1,32 @@
-# AURA — Premium Minimalist Liquid Glass Music Player
+# AURA MIX — Discover what's hot. Hear it mixed.
 
-A Progressive Web App (PWA) inspired by Apple's Liquid Glass design language. AURA offers a fast, uncluttered music player with a glass-based UI, persistent mini-player, dynamic artwork-derived backdrop lighting, synchronized karaoke lyrics, and a pluggable music provider engine.
+A mobile-first music discovery application centered around continuously generated short-form music mixes and mashups based on the latest trending songs.
 
-🌐 **Live Vercel App**: [https://spotify-who.vercel.app](https://spotify-who.vercel.app)  
+🌐 **Live Vercel Production App**: [https://spotify-who.vercel.app](https://spotify-who.vercel.app)  
 📦 **GitHub Repository**: [https://github.com/MJforti/aura-music-player](https://github.com/MJforti/aura-music-player)
 
 ---
 
-## ✨ Features
+## 🔥 Product Features & Architecture
 
-- **Apple Liquid Glass Aesthetic**: Translucent glass surfaces (`backdrop-filter: blur()`), frosted glass borders, glowing highlights, and Apple system font hierarchy (`SF Pro Display`, `Geist Sans`, `Inter`).
-- **Dynamic Artwork Backdrop**: Dynamic background color extraction and blur derived from active track artwork.
-- **Persistent Playback Engine**: Web MediaSession API integration (lockscreen controls), HTML5 audio streaming, queue management, volume scrubber, shuffle, and repeat modes.
-- **Persistent Mini-Player**: Floating bar above bottom navigation, expandable into full-screen **Now Playing** sheet with spring animations.
-- **Live Online & Offline Streaming**: Integrated `HybridMusicProvider` fetching 1,000,000+ live streamable songs from Audius Open Network + curated offline tracks.
-- **Spotify Web API Architecture**: Pluggable `SpotifyMusicProvider` ready for Spotify OAuth credentials.
-- **Library & Search**: Custom playlist manager (Create, Rename, Delete, Add/Remove tracks), Liked Songs manager, listening history, search with genre bento cards.
-- **Installable PWA**: Manifest and Service Worker support.
-
----
-
-## 🛠️ Tech Stack
-
-- **Framework**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS v3 (Liquid Glass utilities)
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **Audio Engine**: HTML5 Audio + Web MediaSession API
+- **Primary Unit = MIX**: Replaced traditional song-centric playback with short-form continuous **Mixes** (`🔥 Global Heat`, `🇮🇳 India Heat`, `📱 Viral Right Now`, `🆕 New & Hot`, `💃 Party`, `🌙 Midnight`, `❤️ Love`, `🎤 Hip-Hop`, `🎸 Indie`).
+- **Continuous Mix Progression**: `MixPlaybackContext` automatically advances to the next track segment in the active mix when a preview finishes, creating a seamless listening session.
+- **Discover Screen**: Hero Card for **🔥 GLOBAL HEAT** (25 tracks, ~4:38 duration, primary "PLAY MIX" CTA) with live timestamps ("Updated 4 min ago").
+- **1-Tap Mixes Catalog**: Explore all 10 mix categories with 1-tap instant streaming.
+- **Clip Search & My Mix**: Search any song/artist, play discovery clips, and tap `+ Add to Mix` to construct custom personal mixes.
+- **Immersive Mix Player**: Full-screen Apple Liquid Glass modal showing current track, mix progress (`0:43 / 4:38`), and **Up Next** snippet preview.
+- **Persistent Mini-Player**: Floating bar above bottom dock displaying active Mix title, track, progress, and play/pause controls.
+- **Installable PWA**: Service Worker shell caching and Web Manifest.
 
 ---
 
-## 🚀 Local Development
+## 🛠️ Local Development & Deployment
 
 ```bash
 # Install dependencies
 npm install
 
-# Start local development server
+# Start local dev server
 npm run dev
 
 # Build production bundle
