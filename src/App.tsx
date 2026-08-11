@@ -1,93 +1,50 @@
 import React, { useState } from 'react';
 import { UserProvider } from './context/UserContext';
-import { PlaybackProvider, usePlayback } from './context/PlaybackContext';
-import { BottomNav, NavTab } from './components/navigation/BottomNav';
-import { MiniPlayer } from './components/player/MiniPlayer';
-import { NowPlayingModal } from './components/player/NowPlayingModal';
-import { HomeView } from './components/views/HomeView';
+import { MixPlaybackProvider } from './context/MixPlaybackContext';
+import { BottomNav, ActiveTab } from './components/navigation/BottomNav';
+import { DiscoverView } from './components/views/DiscoverView';
+import { MixesView } from './components/views/MixesView';
 import { SearchView } from './components/views/SearchView';
-import { LibraryView } from './components/views/LibraryView';
-import { DetailModal } from './components/views/DetailModal';
-import { Track, Album, Artist, Playlist } from './types/music';
+import { MeView } from './components/views/MeView';
+import { MiniPlayer } from './components/player/MiniPlayer';
+import { MixPlayerModal } from './components/player/MixPlayerModal';
 
-const AppContent: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<NavTab>('home');
-  const { playTrack } = usePlayback();
-
-  // Detail Modal state
-  const [detailModal, setDetailModal] = useState<{
-    isOpen: boolean;
-    type: 'album' | 'artist' | 'playlist' | null;
-    data: { item: Album | Artist | Playlist; tracks: Track[] } | null;
-  }>({
-    isOpen: false,
-    type: null,
-    data: null,
-  });
-
-  const handleOpenDetail = (
-    type: 'album' | 'artist' | 'playlist',
-    item: Album | Artist | Playlist,
-    tracks: Track[]
-  ) => {
-    setDetailModal({
-      isOpen: true,
-      type,
-      data: { item, tracks },
-    });
-  };
-
-  const handleCloseDetail = () => {
-    setDetailModal((prev) => ({ ...prev, isOpen: false }));
-  };
+export function AppContent() {
+  const [activeTab, setActiveTab] = useState<ActiveTab>('discover');
 
   return (
-    <div className="min-h-screen bg-black text-white flex justify-center items-center selection:bg-purple-500/30">
-      {/* Mobile Shell Container (Target width 390px, scalable on desktop) */}
-      <div className="w-full max-w-md h-[100vh] sm:h-[844px] bg-aura-bg border-0 sm:border border-white/10 sm:rounded-[44px] shadow-[0_0_100px_rgba(0,0,0,0.9)] relative flex flex-col overflow-hidden">
-        {/* Dynamic Background Noise & Ambient Glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-80 bg-purple-600/10 blur-[100px] pointer-events-none rounded-full" />
-
-        {/* Scrollable View Area */}
-        <main className="flex-1 overflow-y-auto relative z-10 no-scrollbar">
-          {activeTab === 'home' && <HomeView onOpenDetail={handleOpenDetail} />}
-          {activeTab === 'search' && <SearchView onOpenDetail={handleOpenDetail} />}
-          {activeTab === 'library' && <LibraryView onOpenDetail={handleOpenDetail} />}
-        </main>
-
-        {/* Persistent Floating MiniPlayer */}
-        <MiniPlayer />
-
-        {/* Persistent Bottom Navigation Dock */}
-        <BottomNav activeTab={activeTab} onSelectTab={setActiveTab} />
-
-        {/* Full-Screen Now Playing Modal Sheet */}
-        <NowPlayingModal />
-
-        {/* Album / Artist / Playlist Detail Modal */}
-        <DetailModal
-          isOpen={detailModal.isOpen}
-          type={detailModal.type}
-          data={detailModal.data}
-          onClose={handleCloseDetail}
-          onSelectTrack={(track, queue) => {
-            playTrack(track, queue);
-            handleCloseDetail();
-          }}
-        />
+    <div className="min-h-screen bg-black text-white selection:bg-orange-500 selection:text-white font-sans antialiased overflow-x-hidden">
+      {/* Dynamic Ambient Blur Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-orange-600/15 rounded-full blur-[120px]" />
+        <div className="absolute top-1/3 -right-40 w-96 h-96 bg-rose-600/15 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-purple-600/15 rounded-full blur-[120px]" />
       </div>
+
+      {/* Main View Shell */}
+      <main className="relative z-10 max-w-md mx-auto min-h-screen">
+        {activeTab === 'discover' && <DiscoverView />}
+        {activeTab === 'mixes' && <MixesView />}
+        {activeTab === 'search' && <SearchView />}
+        {activeTab === 'me' && <MeView />}
+      </main>
+
+      {/* Persistent Mix Players & Dock */}
+      <MiniPlayer />
+      <MixPlayerModal />
+      <BottomNav activeTab={activeTab} onChangeTab={setActiveTab} />
     </div>
   );
-};
+}
 
-export const App: React.FC = () => {
+export function App() {
   return (
     <UserProvider>
-      <PlaybackProvider>
+      <MixPlaybackProvider>
         <AppContent />
-      </PlaybackProvider>
+      </MixPlaybackProvider>
     </UserProvider>
   );
-};
+}
 
 export default App;

@@ -1,105 +1,81 @@
 import React from 'react';
-import { usePlayback } from '../../context/PlaybackContext';
-import { useUser } from '../../context/UserContext';
-import { Play, Pause, SkipForward, Heart } from 'lucide-react';
+import { useMixPlayback } from '../../context/MixPlaybackContext';
+import { Play, Pause, SkipForward } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const MiniPlayer: React.FC = () => {
-  const { currentTrack, isPlaying, togglePlay, next, currentTime, duration, setIsNowPlayingOpen } =
-    usePlayback();
-  const { isLiked, toggleLikeTrack } = useUser();
+  const {
+    currentMix,
+    currentTrack,
+    isPlaying,
+    pause,
+    resume,
+    nextTrack,
+    mixCurrentTime,
+    mixDuration,
+    setIsMixPlayerOpen,
+  } = useMixPlayback();
 
-  if (!currentTrack) return null;
+  if (!currentMix || !currentTrack) return null;
 
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const liked = isLiked(currentTrack.id);
+  const progressPercent = mixDuration > 0 ? (mixCurrentTime / mixDuration) * 100 : 0;
 
   return (
-    <motion.div
-      initial={{ y: 50, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      exit={{ y: 50, opacity: 0 }}
-      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed bottom-[74px] left-0 right-0 z-30 max-w-md mx-auto px-3 pointer-events-auto"
-    >
-      <div
-        onClick={() => setIsNowPlayingOpen(true)}
-        className="glass-card hover:bg-white/[0.08] transition-all cursor-pointer rounded-2xl p-2.5 flex items-center justify-between gap-3 shadow-2xl shadow-black/90 border border-white/15 relative overflow-hidden backdrop-blur-2xl group"
+    <div className="fixed bottom-20 left-0 right-0 z-30 px-4 pointer-events-auto">
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        onClick={() => setIsMixPlayerOpen(true)}
+        className="max-w-md mx-auto rounded-3xl bg-zinc-900/90 backdrop-blur-2xl border border-white/20 p-2.5 shadow-2xl flex items-center justify-between cursor-pointer group"
       >
-        {/* Ambient background accent glow derived from artwork accentColor */}
-        <div
-          className="absolute inset-0 opacity-20 pointer-events-none transition-all duration-700 blur-2xl"
-          style={{ backgroundColor: currentTrack.accentColor || '#8B5CF6' }}
-        />
-
-        {/* Micro progress line at top of miniplayer */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/10">
-          <div
-            className="h-full bg-white transition-all duration-100"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-
-        {/* Album Artwork */}
-        <div className="relative w-11 h-11 rounded-xl overflow-hidden shadow-md flex-shrink-0 border border-white/10">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
           <img
-            src={currentTrack.artworkUrl}
+            src={currentTrack.artworkUrl || currentMix.artworkUrl}
             alt={currentTrack.title}
-            className="w-full h-full object-cover"
+            className="w-12 h-12 rounded-2xl object-cover border border-white/20 flex-shrink-0"
           />
-          {isPlaying && (
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center gap-0.5">
-              <span className="w-0.5 h-3 bg-white rounded-full animate-bounce [animation-delay:-0.3s]" />
-              <span className="w-0.5 h-4 bg-white rounded-full animate-bounce [animation-delay:-0.15s]" />
-              <span className="w-0.5 h-2.5 bg-white rounded-full animate-bounce" />
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-orange-400 truncate">
+                {currentMix.title}
+              </span>
             </div>
-          )}
+            <p className="text-xs font-bold text-white truncate">{currentTrack.title}</p>
+            <p className="text-[11px] font-medium text-white/50 truncate">{currentTrack.artistName}</p>
+          </div>
         </div>
 
-        {/* Track Title & Artist */}
-        <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-semibold text-white truncate tracking-tight">
-            {currentTrack.title}
-          </h4>
-          <p className="text-xs text-white/50 truncate font-medium">{currentTrack.artistName}</p>
-        </div>
-
-        {/* Action Controls */}
-        <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-          {/* Like button */}
+        <div className="flex items-center gap-2 flex-shrink-0 pr-1">
           <button
-            onClick={() => toggleLikeTrack(currentTrack.id)}
-            className="p-2 text-white/60 hover:text-white transition-all rounded-full hover:bg-white/10 active:scale-90 cursor-pointer"
-            aria-label="Like song"
+            onClick={(e) => {
+              e.stopPropagation();
+              isPlaying ? pause() : resume();
+            }}
+            className="p-3 rounded-full bg-gradient-to-tr from-orange-500 to-rose-600 text-white shadow-md hover:scale-105 transition-transform"
           >
-            <Heart
-              className={`w-4 h-4 ${liked ? 'fill-rose-500 text-rose-500' : ''}`}
-            />
+            {isPlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 fill-white ml-0.5" />}
           </button>
 
-          {/* Play / Pause Toggle */}
           <button
-            onClick={togglePlay}
-            className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer"
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-          >
-            {isPlaying ? (
-              <Pause className="w-4 h-4 fill-black" />
-            ) : (
-              <Play className="w-4 h-4 fill-black ml-0.5" />
-            )}
-          </button>
-
-          {/* Skip Next */}
-          <button
-            onClick={next}
-            className="p-2 text-white/70 hover:text-white transition-all rounded-full hover:bg-white/10 active:scale-90 cursor-pointer"
-            aria-label="Next song"
+            onClick={(e) => {
+              e.stopPropagation();
+              nextTrack();
+            }}
+            className="p-2.5 rounded-full bg-white/10 text-white/80 hover:text-white hover:bg-white/20 transition-all"
           >
             <SkipForward className="w-4 h-4 fill-current" />
           </button>
         </div>
-      </div>
-    </motion.div>
+
+        {/* TOP MINI PROGRESS BAR */}
+        <div className="absolute top-0 left-4 right-4 h-0.5 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-orange-500 to-rose-500 rounded-full transition-all duration-300"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </motion.div>
+    </div>
   );
 };

@@ -12,7 +12,7 @@ interface UserContextType {
   createPlaylist: (title: string, description?: string, initialTrackId?: string) => Playlist;
   renamePlaylist: (playlistId: string, newTitle: string) => void;
   deletePlaylist: (playlistId: string) => void;
-  addTrackToPlaylist: (playlistId: string, trackId: string) => void;
+  addTrackToPlaylist: (playlistId: string, trackOrId: any) => void;
   removeTrackFromPlaylist: (playlistId: string, trackId: string) => void;
 
   historyTrackIds: string[];
@@ -123,11 +123,17 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCustomPlaylists((prev) => prev.filter((p) => p.id !== playlistId));
   };
 
-  const addTrackToPlaylist = (playlistId: string, trackId: string) => {
+  const addTrackToPlaylist = (playlistId: string, trackOrId: any) => {
+    const trackId = typeof trackOrId === 'string' ? trackOrId : trackOrId.id;
     setCustomPlaylists((prev) =>
       prev.map((p) => {
-        if (p.id === playlistId && !p.trackIds.includes(trackId)) {
-          return { ...p, trackIds: [...p.trackIds, trackId] };
+        if (p.id === playlistId) {
+          const currentTrackIds = p.trackIds || [];
+          const currentTracks = p.tracks || [];
+          if (!currentTrackIds.includes(trackId)) {
+            const updatedTracks = typeof trackOrId === 'object' ? [...currentTracks, trackOrId] : currentTracks;
+            return { ...p, trackIds: [...currentTrackIds, trackId], tracks: updatedTracks };
+          }
         }
         return p;
       })
