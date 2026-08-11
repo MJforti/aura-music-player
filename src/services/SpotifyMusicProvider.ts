@@ -20,8 +20,9 @@ export class SpotifyMusicProvider implements IMusicProvider {
   private tokenExpiresAt: number = 0;
 
   constructor(clientId?: string, clientSecret?: string, accessToken?: string) {
-    this.clientId = clientId || null;
-    this.clientSecret = clientSecret || null;
+    const metaEnv = (import.meta as any).env || {};
+    this.clientId = clientId || metaEnv.VITE_SPOTIFY_CLIENT_ID || null;
+    this.clientSecret = clientSecret || metaEnv.VITE_SPOTIFY_CLIENT_SECRET || null;
     this.accessToken = accessToken || null;
   }
 

@@ -1,5 +1,6 @@
 import { IMusicProvider } from './MusicProvider';
 import { AudiusMusicProvider } from './AudiusMusicProvider';
+import { SpotifyMusicProvider } from './SpotifyMusicProvider';
 import {
   Track,
   Artist,
@@ -258,14 +259,19 @@ export class MockMusicProvider implements IMusicProvider {
 export class HybridMusicProvider implements IMusicProvider {
   private mockProvider = new MockMusicProvider();
   private audiusProvider = new AudiusMusicProvider();
+  private spotifyProvider = new SpotifyMusicProvider();
 
   async getHomeFeed(forceRefresh?: boolean): Promise<HomeFeed> {
     const mockFeed = await this.mockProvider.getHomeFeed(forceRefresh);
     const audiusFeed = await this.audiusProvider.getHomeFeed();
+    const spotifyFeed = await this.spotifyProvider.getHomeFeed();
+
+    const spotifyNew = spotifyFeed?.newReleases || [];
+    const audiusNew = audiusFeed?.newReleases || [];
 
     return {
       recentlyPlayed: mockFeed.recentlyPlayed,
-      newReleases: audiusFeed.newReleases.length > 0 ? audiusFeed.newReleases : mockFeed.newReleases,
+      newReleases: [...spotifyNew, ...audiusNew, ...mockFeed.newReleases].slice(0, 10),
       trending: audiusFeed.trending.length > 0 ? audiusFeed.trending : mockFeed.trending,
       recommendations: audiusFeed.recommendations.length > 0 ? audiusFeed.recommendations : mockFeed.recommendations,
       popularAlbums: MOCK_ALBUMS,
@@ -276,13 +282,20 @@ export class HybridMusicProvider implements IMusicProvider {
   }
 
   async search(query: string, category?: string): Promise<SearchResult> {
+    const spotifyRes = await this.spotifyProvider.search(query);
     const mockRes = await this.mockProvider.search(query);
     const audiusRes = await this.audiusProvider.search(query);
 
+    const tracks = [
+      ...(spotifyRes?.tracks || []),
+      ...mockRes.tracks,
+      ...audiusRes.tracks,
+    ];
+
     return {
-      tracks: [...mockRes.tracks, ...audiusRes.tracks],
-      artists: mockRes.artists,
-      albums: mockRes.albums,
+      tracks,
+      artists: spotifyRes?.artists?.length ? spotifyRes.artists : mockRes.artists,
+      albums: spotifyRes?.albums?.length ? spotifyRes.albums : mockRes.albums,
       playlists: mockRes.playlists,
     };
   }
@@ -297,11 +310,13 @@ export class HybridMusicProvider implements IMusicProvider {
     return live.length > 0 ? live : this.mockProvider.getTrending();
   }
 
-  async getRecommendations(seedTrackId?: string): Promise<Track[]> {
+  async getRecommendations(): Promise<Track[]> {
     return this.mockProvider.getRecommendations();
   }
 
   async getTrack(id: string): Promise<Track | null> {
+    const spotify = await this.spotifyProvider.getTrack(id);
+    if (spotify) return spotify;
     const mock = await this.mockProvider.getTrack(id);
     if (mock) return mock;
     return this.audiusProvider.getTrack(id);
@@ -320,6 +335,8 @@ export class HybridMusicProvider implements IMusicProvider {
   }
 
   async getStreamUrl(trackId: string): Promise<string> {
+    const spotifyUrl = await this.spotifyProvider.getStreamUrl(trackId);
+    if (spotifyUrl) return spotifyUrl;
     const mock = await this.mockProvider.getTrack(trackId);
     if (mock) return mock.audioUrl;
     return this.audiusProvider.getStreamUrl(trackId);
