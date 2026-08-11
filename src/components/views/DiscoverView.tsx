@@ -1,98 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { useMixPlayback } from '../../context/MixPlaybackContext';
-import { trendingService } from '../../services/TrendingService';
-import { mixGenerator } from '../../services/MixGenerator';
-import { Mix } from '../../types/mix';
-import { Play, RotateCw, Globe, Compass, Zap, Disc, Music } from 'lucide-react';
+import { usePlayback } from '../../context/PlaybackContext';
+import { mashupService } from '../../services/MashupService';
+import { Mashup } from '../../types/mashup';
+import { Play, Flame, Disc, Music, Moon, Sparkles, ChevronRight, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const DiscoverView: React.FC = () => {
-  const { playMix, currentMix, isPlaying, setIsMixPlayerOpen } = useMixPlayback();
-  const [heroMix, setHeroMix] = useState<Mix | null>(null);
-  const [indiaMix, setIndiaMix] = useState<Mix | null>(null);
-  const [viralMix, setViralMix] = useState<Mix | null>(null);
-  const [newHotMix, setNewHotMix] = useState<Mix | null>(null);
-  const [partyMix, setPartyMix] = useState<Mix | null>(null);
+  const { playMashup, currentMashup, isPlaying, setIsMixPlayerOpen, openMashupDetail } = usePlayback();
+  const [featuredMashup, setFeaturedMashup] = useState<Mashup | null>(null);
+  const [trendingMashups, setTrendingMashups] = useState<Mashup[]>([]);
+  const [newMashups, setNewMashups] = useState<Mashup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const loadMixes = async (forceRefresh: boolean = false) => {
-    if (forceRefresh) setRefreshing(true);
-    try {
-      const [globalTracks, indiaTracks, viralTracks, newHotTracks, partyTracks] = await Promise.all([
-        trendingService.getTrendingGlobal(),
-        trendingService.getTrendingIndia(),
-        trendingService.getTrendingViral(),
-        trendingService.getNewAndHot(),
-        trendingService.getCategoryTracks('party'),
-      ]);
-
-      const globalHero = mixGenerator.createMix(
-        'mix-global-heat',
-        'GLOBAL HEAT',
-        'Top 25 Trending Songs Mixed',
-        'Continuous short-form listening session of worldwide chart-toppers.',
-        'global',
-        'Worldwide Charts',
-        globalTracks,
-        true
-      );
-
-      const indiaHeat = mixGenerator.createMix(
-        'mix-india-heat',
-        'INDIA HEAT',
-        'Trending Indian Music',
-        'Bollywood, Punjabi, and Indian indie chart busters.',
-        'india',
-        'Indian Charts',
-        indiaTracks
-      );
-
-      const viralHeat = mixGenerator.createMix(
-        'mix-viral',
-        'VIRAL TRENDS',
-        'Exploding Tracks',
-        'Music currently dominating social feeds and viral charts.',
-        'viral',
-        'Viral Trends',
-        viralTracks
-      );
-
-      const newHot = mixGenerator.createMix(
-        'mix-new-hot',
-        'NEW RELEASES',
-        'Fresh Releases Mixed',
-        'Brand new songs mixed seamlessly for instant discovery.',
-        'new_hot',
-        'Fresh Music',
-        newHotTracks
-      );
-
-      const party = mixGenerator.createMix(
-        'mix-party',
-        'PARTY BEATS',
-        'High Energy Beats',
-        'Upbeat continuous dance and pop set.',
-        'party',
-        'Party Energy',
-        partyTracks
-      );
-
-      setHeroMix(globalHero);
-      setIndiaMix(indiaHeat);
-      setViralMix(viralHeat);
-      setNewHotMix(newHot);
-      setPartyMix(party);
-    } catch (e) {
-      console.error('Failed to load discovery mixes:', e);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
 
   useEffect(() => {
-    loadMixes();
+    const loadDiscoverData = async () => {
+      try {
+        const feat = await mashupService.getFeaturedMashup();
+        const trend = await mashupService.getTrendingMashups();
+        const fresh = await mashupService.getNewMashups();
+
+        setFeaturedMashup(feat);
+        setTrendingMashups(trend);
+        setNewMashups(fresh);
+      } catch (e) {
+        console.error('Failed to load discovery mashups:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDiscoverData();
   }, []);
 
   const getGreeting = () => {
@@ -102,7 +39,7 @@ export const DiscoverView: React.FC = () => {
     return 'Good evening';
   };
 
-  if (loading || !heroMix) {
+  if (loading || !featuredMashup) {
     return (
       <div className="p-6 space-y-6 animate-pulse">
         <div className="h-6 bg-zinc-800 rounded-xl w-32" />
@@ -112,51 +49,74 @@ export const DiscoverView: React.FC = () => {
     );
   }
 
-  const isHeroPlaying = currentMix?.id === heroMix.id && isPlaying;
+  const isHeroPlaying = currentMashup?.id === featuredMashup.id && isPlaying;
 
   return (
     <div className="pb-36 pt- safe px-4 space-y-8 no-scrollbar">
       {/* Header Bar */}
-      <div className="flex items-center justify-between pt-3">
-        <div>
-          <p className="text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-400">AURA MIX</p>
-          <h1 className="text-2xl font-bold text-white tracking-tight">{getGreeting()}</h1>
+      <div className="pt-3">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-400">AURA</p>
+          <span className="text-[10px] font-mono text-zinc-500 border border-zinc-800 px-2 py-0.5 rounded-full">BOLLYWOOD × GLOBAL</span>
         </div>
-        <button
-          onClick={() => loadMixes(true)}
-          disabled={refreshing}
-          className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700 transition-all active:scale-95"
-          title="Refresh mixes"
-        >
-          <RotateCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-        </button>
+        <h1 className="text-2xl font-bold text-white tracking-tight">{getGreeting()}</h1>
+        <p className="text-xs text-zinc-400 mt-0.5">Discover the mashups you didn't know you needed.</p>
       </div>
 
-      {/* HERO SECTION: GLOBAL HEAT */}
+      {/* HERO FEATURED MASHUP WITH AMBIENT VIDEO BACKDROP */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/90 p-6 shadow-xl"
+        className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl group"
       >
-        <div className="space-y-5">
+        {/* AMBIENT BACKGROUND VIDEO STREAM */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover scale-105 blur-sm hidden sm:block"
+          >
+            <source src="/videos/desktop_format.mp4" type="video/mp4" />
+          </video>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover scale-105 blur-sm sm:hidden"
+          >
+            <source src="/videos/mobile_format.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent" />
+        </div>
+
+        <div className="relative z-10 space-y-5">
           <div className="flex items-center justify-between">
-            <span className="px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-200 border border-zinc-700 text-[10px] font-mono font-bold uppercase tracking-wider inline-flex items-center gap-1.5">
-              <Globe className="w-3 h-3 text-zinc-300" /> GLOBAL HEAT
+            <span className="px-2.5 py-1 rounded-md bg-zinc-800/90 text-zinc-200 border border-zinc-700 text-[10px] font-mono font-bold uppercase tracking-wider inline-flex items-center gap-1.5 backdrop-blur-md">
+              <Flame className="w-3 h-3 text-orange-400 fill-current" /> TRENDING NOW
             </span>
-            <span className="text-xs font-mono text-zinc-500">{heroMix.updatedAt}</span>
+            <button
+              onClick={() => openMashupDetail(featuredMashup)}
+              className="p-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 text-zinc-400 hover:text-white"
+              title="View Mashup Details"
+            >
+              <Info className="w-4 h-4" />
+            </button>
           </div>
 
           <div className="flex items-end justify-between gap-4 pt-1">
             <div className="space-y-1 min-w-0">
-              <h2 className="text-3xl font-extrabold text-white tracking-tight leading-none">{heroMix.title}</h2>
-              <p className="text-xs font-mono text-zinc-400 pt-1">
-                {heroMix.trackCount} TRACKS • {mixGenerator.formatDuration(heroMix.duration)}
+              <h2 className="text-3xl font-extrabold text-white tracking-tight leading-tight">{featuredMashup.title}</h2>
+              <p className="text-xs font-semibold text-zinc-300">
+                {featuredMashup.sourceTracks.map(t => `${t.title} (${t.artist})`).join(' × ')}
               </p>
-              <p className="text-xs text-zinc-400 line-clamp-2 pt-1">{heroMix.description}</p>
+              <p className="text-xs text-zinc-400 line-clamp-2 pt-1">{featuredMashup.description}</p>
             </div>
             <img
-              src={heroMix.artworkUrl}
-              alt={heroMix.title}
+              src={featuredMashup.artwork}
+              alt={featuredMashup.title}
               className="w-20 h-20 rounded-xl object-cover border border-zinc-800 shadow-md flex-shrink-0"
             />
           </div>
@@ -167,126 +127,90 @@ export const DiscoverView: React.FC = () => {
                 if (isHeroPlaying) {
                   setIsMixPlayerOpen(true);
                 } else {
-                  playMix(heroMix);
+                  playMashup(featuredMashup);
                   setIsMixPlayerOpen(true);
                 }
               }}
               className="w-full py-3.5 px-6 rounded-xl bg-white text-black font-bold text-xs tracking-wider uppercase hover:bg-zinc-200 active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm"
             >
               <Play className="w-4 h-4 fill-black" />
-              {isHeroPlaying ? 'OPEN MIX PLAYER' : 'PLAY MIX'}
+              {isHeroPlaying ? 'OPEN MASHUP PLAYER' : 'PLAY MASHUP'}
             </button>
           </div>
         </div>
       </motion.div>
 
-      {/* CATEGORY MIX CARDS */}
-      <div className="space-y-4">
-        <p className="text-xs font-mono font-bold uppercase tracking-widest text-zinc-400 px-1">Curated Mixes</p>
+      {/* SECTION: TRENDING MASHUPS CAROUSEL */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-sm font-mono font-bold uppercase tracking-widest text-zinc-300 flex items-center gap-2">
+            <Flame className="w-4 h-4 text-orange-400" /> Trending Mashups
+          </h3>
+          <span className="text-xs font-mono text-zinc-500">Top Rated</span>
+        </div>
 
-        {/* INDIA HEAT */}
-        {indiaMix && (
-          <div
-            onClick={() => {
-              playMix(indiaMix);
-              setIsMixPlayerOpen(true);
-            }}
-            className="p-4 rounded-2xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 transition-all cursor-pointer flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <img src={indiaMix.artworkUrl} alt={indiaMix.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-zinc-800" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-white group-hover:text-zinc-200 truncate">{indiaMix.title}</span>
-                  <span className="text-[10px] font-mono text-zinc-500">{indiaMix.updatedAt}</span>
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 pt-1">
+          {trendingMashups.map((m) => (
+            <div
+              key={m.id}
+              onClick={() => {
+                playMashup(m);
+                setIsMixPlayerOpen(true);
+              }}
+              className="flex-shrink-0 w-44 space-y-2 cursor-pointer group"
+            >
+              <div className="relative aspect-square rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900">
+                <img src={m.artwork} alt={m.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="p-3 rounded-full bg-white text-black">
+                    <Play className="w-4 h-4 fill-black ml-0.5" />
+                  </div>
                 </div>
-                <p className="text-xs font-mono text-zinc-400 mt-0.5">{indiaMix.trackCount} Tracks • {mixGenerator.formatDuration(indiaMix.duration)}</p>
-                <p className="text-xs text-zinc-500 truncate mt-0.5">{indiaMix.subtitle}</p>
+                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[9px] font-mono text-zinc-300 border border-zinc-800">
+                  {m.categoryName}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white group-hover:text-zinc-300 truncate">{m.title}</p>
+                <p className="text-[11px] text-zinc-500 truncate">{m.sourceTracks.map(t => t.artist).join(' × ')}</p>
               </div>
             </div>
-            <button className="p-3 rounded-xl bg-zinc-800 text-white border border-zinc-700 group-hover:bg-white group-hover:text-black transition-all flex-shrink-0">
-              <Play className="w-4 h-4 fill-current ml-0.5" />
-            </button>
-          </div>
-        )}
+          ))}
+        </div>
+      </div>
 
-        {/* VIRAL TRENDS */}
-        {viralMix && (
-          <div
-            onClick={() => {
-              playMix(viralMix);
-              setIsMixPlayerOpen(true);
-            }}
-            className="p-4 rounded-2xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 transition-all cursor-pointer flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <img src={viralMix.artworkUrl} alt={viralMix.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-zinc-800" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-white group-hover:text-zinc-200 truncate">{viralMix.title}</span>
-                  <span className="text-[10px] font-mono text-zinc-500">{viralMix.updatedAt}</span>
-                </div>
-                <p className="text-xs font-mono text-zinc-400 mt-0.5">{viralMix.trackCount} Tracks • {mixGenerator.formatDuration(viralMix.duration)}</p>
-                <p className="text-xs text-zinc-500 truncate mt-0.5">{viralMix.subtitle}</p>
-              </div>
-            </div>
-            <button className="p-3 rounded-xl bg-zinc-800 text-white border border-zinc-700 group-hover:bg-white group-hover:text-black transition-all flex-shrink-0">
-              <Play className="w-4 h-4 fill-current ml-0.5" />
-            </button>
-          </div>
-        )}
+      {/* SECTION: NEW MASHUPS */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-sm font-mono font-bold uppercase tracking-widest text-zinc-300 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-cyan-400" /> New Mashups
+          </h3>
+          <span className="text-xs font-mono text-zinc-500">Fresh Crossovers</span>
+        </div>
 
-        {/* NEW RELEASES */}
-        {newHotMix && (
-          <div
-            onClick={() => {
-              playMix(newHotMix);
-              setIsMixPlayerOpen(true);
-            }}
-            className="p-4 rounded-2xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 transition-all cursor-pointer flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <img src={newHotMix.artworkUrl} alt={newHotMix.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-zinc-800" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-white group-hover:text-zinc-200 truncate">{newHotMix.title}</span>
-                  <span className="text-[10px] font-mono text-zinc-500">{newHotMix.updatedAt}</span>
+        <div className="space-y-2">
+          {newMashups.slice(0, 4).map((m) => (
+            <div
+              key={m.id}
+              onClick={() => {
+                playMashup(m);
+                setIsMixPlayerOpen(true);
+              }}
+              className="p-3 rounded-xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 transition-all cursor-pointer flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-3.5 min-w-0">
+                <img src={m.artwork} alt={m.title} className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-zinc-800" />
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white group-hover:text-zinc-200 truncate">{m.title}</p>
+                  <p className="text-xs text-zinc-400 truncate">{m.sourceTracks.map(t => `${t.title} (${t.artist})`).join(' × ')}</p>
                 </div>
-                <p className="text-xs font-mono text-zinc-400 mt-0.5">{newHotMix.trackCount} Tracks • {mixGenerator.formatDuration(newHotMix.duration)}</p>
-                <p className="text-xs text-zinc-500 truncate mt-0.5">{newHotMix.subtitle}</p>
               </div>
+              <button className="p-2.5 rounded-xl bg-zinc-800 text-white border border-zinc-700 group-hover:bg-white group-hover:text-black transition-all flex-shrink-0">
+                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+              </button>
             </div>
-            <button className="p-3 rounded-xl bg-zinc-800 text-white border border-zinc-700 group-hover:bg-white group-hover:text-black transition-all flex-shrink-0">
-              <Play className="w-4 h-4 fill-current ml-0.5" />
-            </button>
-          </div>
-        )}
-
-        {/* PARTY BEATS */}
-        {partyMix && (
-          <div
-            onClick={() => {
-              playMix(partyMix);
-              setIsMixPlayerOpen(true);
-            }}
-            className="p-4 rounded-2xl bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 transition-all cursor-pointer flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <img src={partyMix.artworkUrl} alt={partyMix.title} className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-zinc-800" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-white group-hover:text-zinc-200 truncate">{partyMix.title}</span>
-                  <span className="text-[10px] font-mono text-zinc-500">{partyMix.updatedAt}</span>
-                </div>
-                <p className="text-xs font-mono text-zinc-400 mt-0.5">{partyMix.trackCount} Tracks • {mixGenerator.formatDuration(partyMix.duration)}</p>
-                <p className="text-xs text-zinc-500 truncate mt-0.5">{partyMix.subtitle}</p>
-              </div>
-            </div>
-            <button className="p-3 rounded-xl bg-zinc-800 text-white border border-zinc-700 group-hover:bg-white group-hover:text-black transition-all flex-shrink-0">
-              <Play className="w-4 h-4 fill-current ml-0.5" />
-            </button>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
     </div>
   );

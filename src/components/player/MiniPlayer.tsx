@@ -1,24 +1,24 @@
 import React from 'react';
-import { useMixPlayback } from '../../context/MixPlaybackContext';
+import { usePlayback } from '../../context/PlaybackContext';
 import { Play, Pause, SkipForward } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const MiniPlayer: React.FC = () => {
   const {
+    currentMashup,
     currentMix,
-    currentTrack,
     isPlaying,
     pause,
     resume,
-    nextTrack,
-    mixCurrentTime,
-    mixDuration,
+    next,
+    currentTime,
+    duration,
     setIsMixPlayerOpen,
-  } = useMixPlayback();
+  } = usePlayback();
 
-  if (!currentMix || !currentTrack) return null;
+  if (!currentMashup) return null;
 
-  const progressPercent = mixDuration > 0 ? (mixCurrentTime / mixDuration) * 100 : 0;
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div className="fixed bottom-20 left-0 right-0 z-30 px-4 pointer-events-auto">
@@ -30,19 +30,21 @@ export const MiniPlayer: React.FC = () => {
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <img
-            src={currentTrack.artworkUrl || currentMix.artworkUrl}
-            alt={currentTrack.title}
+            src={currentMashup.artwork}
+            alt={currentMashup.title}
             className="w-11 h-11 rounded-xl object-cover border border-zinc-800 flex-shrink-0"
           />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 truncate">
-                {currentMix.title}
+                {currentMix ? currentMix.title : currentMashup.categoryName}
               </span>
             </div>
-            <p className="text-xs font-bold text-white truncate">{currentTrack.title}</p>
-            <p className="text-[11px] text-zinc-400 truncate">{currentTrack.artistName}</p>
+            <p className="text-xs font-bold text-white truncate">{currentMashup.title}</p>
+            <p className="text-[11px] text-zinc-400 truncate">
+              {currentMashup.sourceTracks.map(t => `${t.title} (${t.artist})`).join(' × ')}
+            </p>
           </div>
         </div>
 
@@ -57,15 +59,17 @@ export const MiniPlayer: React.FC = () => {
             {isPlaying ? <Pause className="w-3.5 h-3.5 fill-black" /> : <Play className="w-3.5 h-3.5 fill-black ml-0.5" />}
           </button>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              nextTrack();
-            }}
-            className="p-2 rounded-xl bg-zinc-900 text-zinc-400 hover:text-white transition-all border border-zinc-800"
-          >
-            <SkipForward className="w-3.5 h-3.5 fill-current" />
-          </button>
+          {currentMix && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                next();
+              }}
+              className="p-2 rounded-xl bg-zinc-900 text-zinc-400 hover:text-white transition-all border border-zinc-800"
+            >
+              <SkipForward className="w-3.5 h-3.5 fill-current" />
+            </button>
+          )}
         </div>
 
         {/* TOP MINI PROGRESS BAR */}
