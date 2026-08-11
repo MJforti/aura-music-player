@@ -102,7 +102,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenDetail }) => {
           <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1">
-                <Flame className="w-3 h-3 fill-current" /> Trending Hero Track
+                <Flame className="w-3 h-3 fill-current" /> Live Featured Track
               </span>
               <h2 className="text-2xl font-black text-white tracking-tight">{feed.trending[0].title}</h2>
               <p className="text-sm text-white/60 font-medium">{feed.trending[0].artistName}</p>
