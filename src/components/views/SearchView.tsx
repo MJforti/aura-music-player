@@ -21,13 +21,16 @@ const GENRE_CARDS = [
   { name: 'Techno Ambient', color: 'from-blue-600 to-indigo-600', img: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80' },
 ];
 
+import { catalogManager } from '../../services/CatalogManager';
+import { SearchResults as CatalogSearchResults } from '../../types/catalog';
+
 export const SearchView: React.FC<SearchViewProps> = ({ onOpenDetail }) => {
   const { playTrack, currentTrack } = usePlayback();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<'All' | 'Songs' | 'Artists' | 'Albums' | 'Playlists'>('All');
-  const [results, setResults] = useState<SearchResult | null>(null);
+  const [results, setResults] = useState<any>(null);
   const [searching, setSearching] = useState(false);
-  const [recentSearches, setRecentSearches] = useState<string[]>(['Kora', 'Ambient', 'Synthwave']);
+  const [recentSearches, setRecentSearches] = useState<string[]>(['Arijit Singh', 'Taylor Swift', 'Diljit Dosanjh', 'Synthwave']);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -38,8 +41,14 @@ export const SearchView: React.FC<SearchViewProps> = ({ onOpenDetail }) => {
 
     setSearching(true);
     const timer = setTimeout(async () => {
-      const res = await musicProvider.search(query);
-      setResults(res);
+      const res: CatalogSearchResults = await catalogManager.search(query, { limit: 40 });
+      setResults({
+        topResult: res.topResult,
+        tracks: res.tracks.items,
+        artists: res.artists.items,
+        albums: res.albums.items,
+        playlists: res.playlists.items,
+      });
       setSearching(false);
     }, 180);
 
@@ -192,7 +201,7 @@ export const SearchView: React.FC<SearchViewProps> = ({ onOpenDetail }) => {
               <p className="text-xs font-bold uppercase tracking-wider text-white/50 px-1">
                 Songs ({results.tracks.length})
               </p>
-              {results.tracks.map((t) => (
+              {results.tracks.map((t: any) => (
                 <div
                   key={t.id}
                   onClick={() => playTrack(t, results.tracks)}
@@ -224,12 +233,12 @@ export const SearchView: React.FC<SearchViewProps> = ({ onOpenDetail }) => {
                 Artists ({results.artists.length})
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {results.artists.map((artist) => (
+                {results.artists.map((artist: any) => (
                   <div
                     key={artist.id}
                     onClick={async () => {
-                      const res = await musicProvider.getArtist(artist.id);
-                      if (res) onOpenDetail('artist', res.artist, res.tracks);
+                      const res = await catalogManager.getArtist(artist.id);
+                      if (res) onOpenDetail('artist', res as any, (res.popularTracks || []) as any[]);
                     }}
                     className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 transition-all cursor-pointer"
                   >
@@ -255,12 +264,12 @@ export const SearchView: React.FC<SearchViewProps> = ({ onOpenDetail }) => {
                 Albums ({results.albums.length})
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {results.albums.map((album) => (
+                {results.albums.map((album: any) => (
                   <div
                     key={album.id}
                     onClick={async () => {
-                      const res = await musicProvider.getAlbum(album.id);
-                      if (res) onOpenDetail('album', res.album, res.tracks);
+                      const res = await catalogManager.getAlbum(album.id);
+                      if (res) onOpenDetail('album', res as any, (res.trackList || []) as any[]);
                     }}
                     className="flex items-center gap-3 p-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 transition-all cursor-pointer"
                   >
@@ -286,12 +295,12 @@ export const SearchView: React.FC<SearchViewProps> = ({ onOpenDetail }) => {
                 Playlists ({results.playlists.length})
               </p>
               <div className="space-y-2">
-                {results.playlists.map((playlist) => (
+                {results.playlists.map((playlist: any) => (
                   <div
                     key={playlist.id}
                     onClick={async () => {
-                      const res = await musicProvider.getPlaylist(playlist.id);
-                      if (res) onOpenDetail('playlist', res.playlist, res.tracks);
+                      const res = await catalogManager.getPlaylist(playlist.id);
+                      if (res) onOpenDetail('playlist', res as any, (res.tracks || []) as any[]);
                     }}
                     className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.04] hover:bg-white/10 border border-white/10 transition-all cursor-pointer"
                   >

@@ -274,7 +274,7 @@ export class SpotifyMusicProvider implements IMusicProvider {
 
     const mockAlb = MOCK_ALBUMS.find(a => a.id === id);
     if (mockAlb) {
-      return { album: mockAlb, tracks: MOCK_TRACKS.filter(t => mockAlb.trackIds.includes(t.id)) };
+      return { album: mockAlb, tracks: MOCK_TRACKS.filter(t => (mockAlb.trackIds || []).includes(t.id)) };
     }
     return null;
   }

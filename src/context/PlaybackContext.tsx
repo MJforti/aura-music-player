@@ -110,8 +110,10 @@ export const PlaybackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       }
 
+      const targetStream = track.audioUrl || track.previewStreamUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+
       if (audioRef.current) {
-        audioRef.current.src = track.audioUrl;
+        audioRef.current.src = targetStream;
         audioRef.current.load();
         audioRef.current
           .play()

@@ -1,56 +1,30 @@
-export interface LyricsLine {
-  time: number; // in seconds
-  text: string;
-}
+import {
+  Track as CatalogTrack,
+  Artist as CatalogArtist,
+  Album as CatalogAlbum,
+  Playlist as CatalogPlaylist,
+  TrackLyricsLine,
+  TrackLyrics,
+} from './catalog';
 
-export interface Lyrics {
-  trackId: string;
-  lines: LyricsLine[];
-}
+export type { TrackLyricsLine, TrackLyrics };
+export type Lyrics = TrackLyrics;
 
-export interface Track {
-  id: string;
-  title: string;
-  artistId: string;
-  artistName: string;
-  albumId: string;
-  albumName: string;
-  artworkUrl: string;
+export interface Track extends CatalogTrack {
   audioUrl: string;
-  duration: number; // seconds
-  genre: string;
-  lyrics?: Lyrics;
-  accentColor?: string;
-  releaseDate?: string;
-  isExplicit?: boolean;
-  isTrending?: boolean;
-  isNewRelease?: boolean;
-  playsCount?: number;
 }
 
-export interface Artist {
-  id: string;
-  name: string;
-  avatarUrl: string;
-  bio: string;
+export interface Artist extends CatalogArtist {
   monthlyListeners: number;
-  genres: string[];
-  popularTrackIds: string[];
+  popularTrackIds?: string[];
 }
 
-export interface Album {
-  id: string;
-  title: string;
-  artistId: string;
-  artistName: string;
-  artworkUrl: string;
-  releaseYear: number;
-  trackIds: string[];
+export interface Album extends CatalogAlbum {
+  trackIds?: string[];
   genre: string;
 }
 
-export interface Playlist {
-  id: string;
+export interface Playlist extends CatalogPlaylist {
   title: string;
   description: string;
   coverUrl: string;

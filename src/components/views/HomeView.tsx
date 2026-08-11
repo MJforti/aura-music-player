@@ -7,9 +7,10 @@ import { GlassPanel } from '../ui/GlassPanel';
 import { SettingsModal } from '../modals/SettingsModal';
 import { Play, Sparkles, RefreshCw, SlidersHorizontal, Flame, Compass } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { catalogManager } from '../../services/CatalogManager';
 
 interface HomeViewProps {
-  onOpenDetail: (type: 'album' | 'artist' | 'playlist', item: Album | Artist, tracks: Track[]) => void;
+  onOpenDetail: (type: 'album' | 'artist' | 'playlist', item: any, tracks: Track[]) => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({ onOpenDetail }) => {
@@ -22,8 +23,35 @@ export const HomeView: React.FC<HomeViewProps> = ({ onOpenDetail }) => {
   const loadFeed = async (forceRefresh: boolean = false) => {
     if (forceRefresh) setRefreshing(true);
     try {
-      const data = await musicProvider.getHomeFeed();
-      setFeed(data);
+      const [trendingRes, newReleasesRes, recsRes] = await Promise.all([
+        catalogManager.getTrending({ limit: 15 }),
+        catalogManager.getNewReleases({ limit: 15 }),
+        catalogManager.getRecommendations({ limit: 15 }),
+      ]);
+
+      const trendingTracks = (trendingRes.items as any[]).map(t => ({ ...t, audioUrl: t.previewStreamUrl || t.audioUrl || '' }));
+      const newReleaseAlbums = (newReleasesRes.items as any[]).map(alb => ({ ...alb, genre: alb.genres?.[0] || 'Music', trackIds: [] }));
+      const recommendationTracks = (recsRes.items as any[]).map(t => ({ ...t, audioUrl: t.previewStreamUrl || t.audioUrl || '' }));
+
+      const popularArtists: Artist[] = [
+        { id: 'art-arijit', name: 'Arijit Singh', avatarUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80', bio: 'King of Indian Playback Singing.', genres: ['Bollywood', 'Romantic'], monthlyListeners: 48000000, providerId: 'itunes' },
+        { id: 'art-taylor', name: 'Taylor Swift', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80', bio: 'Global Pop Icon & Songwriter.', genres: ['Pop', 'Indie Folk'], monthlyListeners: 99000000, providerId: 'itunes' },
+        { id: 'art-diljit', name: 'Diljit Dosanjh', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80', bio: 'Global Punjabi Music Superstar.', genres: ['Punjabi', 'Bhangra'], monthlyListeners: 24000000, providerId: 'itunes' },
+        { id: 'art-weeknd', name: 'The Weeknd', avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=600&auto=format&fit=crop&q=80', bio: 'R&B & Synth-Pop Megastar.', genres: ['R&B', 'Synth-Pop'], monthlyListeners: 88000000, providerId: 'itunes' },
+        { id: 'art-rahman', name: 'A.R. Rahman', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=600&auto=format&fit=crop&q=80', bio: 'Oscar Winning Indian Music Maestro.', genres: ['Classical', 'Bollywood'], monthlyListeners: 32000000, providerId: 'itunes' },
+        { id: 'art-drake', name: 'Drake', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80', bio: 'Hip-Hop & Rap Icon.', genres: ['Hip-Hop', 'Rap'], monthlyListeners: 80000000, providerId: 'itunes' },
+      ];
+
+      setFeed({
+        recentlyPlayed: trendingTracks.slice(0, 4),
+        newReleases: trendingTracks.slice(0, 10),
+        trending: trendingTracks,
+        recommendations: recommendationTracks,
+        popularAlbums: newReleaseAlbums as any[],
+        popularArtists: popularArtists as any[],
+        recentlyAdded: recommendationTracks,
+        lastUpdated: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      });
     } catch (e) {
       console.error('Failed to load home feed', e);
     } finally {
