@@ -1,11 +1,31 @@
 import React from 'react';
+import { RadioProvider } from './context/RadioContext';
+import { Header } from './components/Header';
+import { StationTuner } from './components/StationTuner';
+import { CassettePlayerCard } from './components/CassettePlayerCard';
+import { StationGrid } from './components/StationGrid';
+
+export function AppContent() {
+  return (
+    <div className="min-h-screen bg-black text-white selection:bg-amber-400 selection:text-black font-sans antialiased overflow-x-hidden">
+      {/* Background Truck Art Grid Texture */}
+      <div className="fixed inset-0 pointer-events-none opacity-20 z-0 bg-[radial-gradient(#FACC15_1px,transparent_1px)] [background-size:24px_24px]" />
+
+      <main className="relative z-10 max-w-md mx-auto min-h-screen space-y-2">
+        <Header />
+        <StationTuner />
+        <CassettePlayerCard />
+        <StationGrid />
+      </main>
+    </div>
+  );
+}
 
 export function App() {
   return (
-    <div className="p-8 text-center text-white bg-black min-h-screen font-sans">
-      <h1 className="text-2xl font-bold">Fresh Blank Project</h1>
-      <p className="text-sm text-zinc-400 mt-2">Ready for a new application build.</p>
-    </div>
+    <RadioProvider>
+      <AppContent />
+    </RadioProvider>
   );
 }
 
